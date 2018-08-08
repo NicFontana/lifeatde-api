@@ -26,4 +26,5 @@
 /config/master.key
 
 .idea
+.idea/*
 config/database.yml
