@@ -4,13 +4,14 @@ class UsersController < ApplicationController
   # GET /users
   def index
     @users = User.all
+    options = {:is_collection => true}
 
-    render json: @users
+    render json: UserSerializer.new(@users, options).serialized_json
   end
 
   # GET /users/1
   def show
-    render json: @user
+    render json: UserSerializer.new(@user).serialized_json
   end
 
   # POST /users

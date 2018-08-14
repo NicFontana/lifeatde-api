@@ -12,6 +12,8 @@ require "action_view/railtie"
 require "action_cable/engine"
 # require "sprockets/railtie"
 require "rails/test_unit/railtie"
+# Workaround for a Rails 5 middleware issue: https://github.com/rails/rails/issues/25525
+require_relative '../app/middleware/jwt_auth'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -31,5 +33,8 @@ module LifeAtDE
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    auth_excluded_path = %w(/login /courses)
+    config.middleware.use JWTAuth, auth_excluded_path
   end
 end
