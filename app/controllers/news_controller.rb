@@ -1,51 +1,39 @@
 class NewsController < ApplicationController
+  include Pagination
   before_action :set_news, only: [:show, :update, :destroy]
 
   # GET /news
   def index
-    @news = News.all
+    @pagy, @news = pagy(News.order(created_at: :desc))
 
-    render json: @news
+    render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
   # GET /news/1
   def show
-    render json: @news
+    render json: NewsSerializer.new(@news).serialized_json
   end
 
-  # POST /news
-  def create
-    @news = News.new(news_params)
+  # -ROUTE-> GET ?
+  #retrieving the news for the course of the logged user
+  def get_news_for_user
+    @course = get_auth_user.course
+    @pagy, @news = pagy(News.where(course: @course))
 
-    if @news.save
-      render json: @news, status: :created, location: @news
-    else
-      render json: @news.errors, status: :unprocessable_entity
-    end
+    render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
-  # PATCH/PUT /news/1
-  def update
-    if @news.update(news_params)
-      render json: @news
-    else
-      render json: @news.errors, status: :unprocessable_entity
-    end
-  end
+  # -ROUTE-> GET ?
+  #retrieving the news for a course
+  def get_news_for_course
+    @course = Course.find_by(params[:course_id])
+    @pagy, @news = pagy(News.where(course: @course))
 
-  # DELETE /news/1
-  def destroy
-    @news.destroy
+    render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_news
       @news = News.find(params[:id])
-    end
-
-    # Only allow a trusted parameter "white list" through.
-    def news_params
-      params.require(:news).permit(:title, :description, :course_id)
     end
 end
