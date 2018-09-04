@@ -34,7 +34,7 @@ module LifeAtDE
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    auth_excluded_path = %w(/api/login /api/courses)
+    auth_excluded_path = %w(/api/login)
     config.middleware.use JWTAuth, auth_excluded_path
   end
 end
