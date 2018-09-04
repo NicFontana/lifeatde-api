@@ -38,6 +38,14 @@ class CoursesController < ApplicationController
     @course.destroy
   end
 
+  #  GET /courses/:id/news
+  def get_news_for_course
+    @course = Course.find_by(params[:course_id])
+    @pagy, @news = pagy(@course.news.order(created_at: :desc))
+
+    render json: NewsSerializer.new(@news, pagination_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_course

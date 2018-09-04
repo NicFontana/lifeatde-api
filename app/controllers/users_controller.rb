@@ -39,6 +39,13 @@ class UsersController < ApplicationController
     @user.destroy
   end
 
+  # GET /users/:id/news
+  def get_news_for_user
+    @pagy, @news = pagy(auth_user.course.news.order(created_at: :desc))
+
+    render json: NewsSerializer.new(@news, pagination_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
