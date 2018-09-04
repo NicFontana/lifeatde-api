@@ -9,7 +9,7 @@ class NewsController < ApplicationController
     render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
-  # GET /news/1
+  # GET /news/:id
   def show
     render json: NewsSerializer.new(@news).serialized_json
   end
