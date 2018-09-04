@@ -15,10 +15,14 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1
   def update
+    unless @user.id == get_auth_user.id
+      return render json: ErrorSerializer.new('You can update only your profile', 403).serialized_json, status: :forbidden
+    end
+
     if @user.update(user_params)
-      render json: @user
+      render json: UserSerializer.new(@user).serialized_json
     else
-      render json: @user.errors, status: :unprocessable_entity
+			render json: ErrorSerializer.new(@user.errors, 422).serialized_json, status: :unprocessable_entity
     end
   end
 
@@ -30,11 +34,15 @@ class UsersController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
-      @user = User.find(params[:id])
+	    begin
+        @user = User.find(params[:id])
+	    rescue ActiveRecord::RecordNotFound => e
+				render json: ErrorSerializer.new(e.message, 404).serialized_json, status: :not_found
+	    end
     end
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-      params.require(:user).permit(:firstname, :lastname, :email, :password_digest, :bio, :birthday, :phone)
+	    params.require(:user).permit(:firstname, :lastname, :email, :password_digest, :bio, :birthday, :phone)
     end
 end

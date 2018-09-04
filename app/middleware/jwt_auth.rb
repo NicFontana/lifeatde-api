@@ -79,12 +79,7 @@ class JWTAuth
 	private
 	def error_response message
 		headers = { 'Content-Type' => 'application/json' }
-		body = {
-				:errors => [
-						{:status => Rack::Utils.status_code(:unauthorized),
-						 :detail => message}
-				]
-		}.to_json
+		body = ErrorSerializer.new(message, Rack::Utils.status_code(:unauthorized)).serialized_json
 
 		[Rack::Utils.status_code(:unauthorized), headers, [body]]
 	end
