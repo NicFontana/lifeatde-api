@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  include Pagination
+  before_action :set_user, only: [:show, :update, :destroy, :get_news_for_user]
 
   # GET /users
   def index
@@ -37,13 +38,6 @@ class UsersController < ApplicationController
   # DELETE /users/1
   def destroy
     @user.destroy
-  end
-
-  # GET /users/:id/news
-  def get_news_for_user
-    @pagy, @news = pagy(auth_user.course.news.order(created_at: :desc))
-
-    render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
   private

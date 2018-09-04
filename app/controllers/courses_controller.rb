@@ -1,5 +1,6 @@
 class CoursesController < ApplicationController
-  before_action :set_course, only: [:show, :update, :destroy]
+  include Pagination
+  before_action :set_course, only: [:show, :update, :destroy, :get_news_for_course]
 
   # GET /courses
   def index
@@ -49,7 +50,7 @@ class CoursesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_course
-      @course = Course.find(params[:id])
+      @course = Course.find(params[:course_id])
     end
 
     # Only allow a trusted parameter "white list" through.

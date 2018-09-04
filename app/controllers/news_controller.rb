@@ -4,7 +4,7 @@ class NewsController < ApplicationController
 
   # GET /news
   def index
-    @pagy, @news = pagy(News.order(created_at: :desc))
+    @pagy, @news = pagy(News.all.order(created_at: :desc))
 
     render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
