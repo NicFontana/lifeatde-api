@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   include Pagination
-  before_action :set_course, only: [:show, :related_news]
+  before_action :set_course, only: [:show]
 
   # GET /courses
   def index
