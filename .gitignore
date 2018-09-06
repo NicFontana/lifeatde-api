@@ -28,4 +28,4 @@
 .idea
 .idea/*
 config/database.yml
-*.DS_STORE
+*.DS_Store
