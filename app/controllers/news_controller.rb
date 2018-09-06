@@ -1,15 +1,14 @@
 class NewsController < ApplicationController
   include Pagination
-  before_action :set_news, only: [:show, :update, :destroy]
+  before_action :set_news, only: [:show]
 
-  # GET /news
-  def index
-    @pagy, @news = pagy(News.all.order(created_at: :desc))
-
+  #GET /courses/:course_id/news
+  def course_news
+    @pagy, @news = pagy(News.course_news(params[:course_id]).order(created_at: :desc))
     render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
-  # GET /news/:id
+  # GET /courses/:course_id/news/:id
   def show
     render json: NewsSerializer.new(@news).serialized_json
   end

@@ -31,7 +31,7 @@ categories = [
 ]
 categories.each {|name| Category.create({name: name}) }
 
-courses = [
+courses_names = [
 		'Ingegneria Elettronica e Informatica',
 		'Ingegneria Meccanica LT',
 		'Ingegneria Civile e Ambientale',
@@ -40,7 +40,8 @@ courses = [
 		'Ingegneria Civile',
 		'Ingegneria Meccanica LM'
 ]
-courses.each {|name| Course.create({name: name})}
+courses=[]
+courses_names.each {|name| courses.push(Course.create({name: name}))}
 
 statuses = [
 		'Aperto',
@@ -87,14 +88,17 @@ end
 end
 
 25.times do
-	News.create(
+	news = News.create(
 			{
 					title: Faker::OnePiece.unique.quote,
-					description: Faker::SiliconValley.quote,
-					course_id: Faker::Number.between(1, 7)
+					description: Faker::SiliconValley.quote
 			}
 	)
+	if news.id % 2 == 0
+		 news.courses << courses.sample
+  end
 end
+
 
 5.times do |i|
 	StudyGroup.create(

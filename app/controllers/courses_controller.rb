@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   include Pagination
-  before_action :set_course, only: [:show, :update, :destroy, :get_news_for_course]
+  before_action :set_course, only: [:show, :related_news]
 
   # GET /courses
   def index
@@ -12,39 +12,6 @@ class CoursesController < ApplicationController
   # GET /courses/1
   def show
     render json: @course
-  end
-
-  # POST /courses
-  def create
-    @course = Course.new(course_params)
-
-    if @course.save
-      render json: @course, status: :created, location: @course
-    else
-      render json: @course.errors, status: :unprocessable_entity
-    end
-  end
-
-  # PATCH/PUT /courses/1
-  def update
-    if @course.update(course_params)
-      render json: @course
-    else
-      render json: @course.errors, status: :unprocessable_entity
-    end
-  end
-
-  # DELETE /courses/1
-  def destroy
-    @course.destroy
-  end
-
-  #  GET /courses/:id/news
-  def get_news_for_course
-    @course = Course.find_by(params[:course_id])
-    @pagy, @news = pagy(@course.news.order(created_at: :desc))
-
-    render json: NewsSerializer.new(@news, pagination_options).serialized_json
   end
 
   private

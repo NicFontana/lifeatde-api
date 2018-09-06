@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_08_143531) do
+ActiveRecord::Schema.define(version: 2018_09_06_092914) do
 
   create_table "categories", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
@@ -25,6 +25,15 @@ ActiveRecord::Schema.define(version: 2018_08_08_143531) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "courses_news", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "course_id"
+    t.bigint "news_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_courses_news_on_course_id"
+    t.index ["news_id"], name: "index_courses_news_on_news_id"
+  end
+
   create_table "documents", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
     t.string "path", null: false
@@ -37,10 +46,8 @@ ActiveRecord::Schema.define(version: 2018_08_08_143531) do
   create_table "news", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
-    t.bigint "course_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["course_id"], name: "index_news_on_course_id"
   end
 
   create_table "project_categories", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -116,8 +123,9 @@ ActiveRecord::Schema.define(version: 2018_08_08_143531) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "courses_news", "courses", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "courses_news", "news", on_update: :cascade, on_delete: :cascade
   add_foreign_key "documents", "projects", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "news", "courses", on_update: :cascade, on_delete: :nullify
   add_foreign_key "project_categories", "categories", on_update: :cascade, on_delete: :cascade
   add_foreign_key "project_categories", "projects", on_update: :cascade, on_delete: :cascade
   add_foreign_key "project_users", "projects", on_update: :cascade, on_delete: :cascade

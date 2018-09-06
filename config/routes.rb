@@ -2,11 +2,10 @@ Rails.application.routes.draw do
   resources :documents
   resources :projects
   resources :categories
-  resources :news
   resources :study_groups
   resources :courses do
-    resources :news
-    # 'news', :to => 'courses#get_news_for_course'
+    resources :news, only: [:show]
+    get 'news', :to => 'news#course_news'
   end
   resources :users
   post 'login', :to => 'authentication#login'
