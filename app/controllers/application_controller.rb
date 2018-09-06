@@ -5,6 +5,6 @@ class ApplicationController < ActionController::API
 	end
 
 	rescue_from ActionController::ParameterMissing do |error|
-		render json: ErrorSerializer.new(error.message, 400).serialized_json, status: :bad_request
+		render json: ErrorSerializer.new(error.message, Rack::Utils.status_code(:bad_request)).serialized_json, status: :bad_request
 	end
 end

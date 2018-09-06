@@ -19,10 +19,10 @@ class ErrorSerializer
 	private
 		def serialize_form_errors
 			response = { errors: [] }
-			@messages.each do |attribute, message|
+			@messages.each do |parameter, message|
 				error = {
 						status: @status,
-						source: attribute,
+						source: parameter,
 						detail: message
 				}
 				response[:errors].push(error)

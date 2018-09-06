@@ -2,12 +2,6 @@ class UsersController < ApplicationController
   include Pagination
   before_action :set_user, only: [:show, :update, :destroy]
 
-  # GET /usersz
-  def index
-    @pagy, @users = pagy(User.all)
-    render json: UserSerializer.new(@users, pagination_options).serialized_json
-  end
-
   # GET /users/1
   def show
     render json: UserSerializer.new(@user).serialized_json
@@ -15,14 +9,14 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1
   def update
-    unless @user.id == get_auth_user.id
-      return render json: ErrorSerializer.new('You can update only your profile', 403).serialized_json, status: :forbidden
+    unless @user.id == auth_user.id
+      return render json: ErrorSerializer.new('You can update only your profile', Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     if @user.update(user_params)
       render json: UserSerializer.new(@user).serialized_json
     else
-			render json: ErrorSerializer.new(@user.errors, 422).serialized_json, status: :unprocessable_entity
+			render json: ErrorSerializer.new(@user.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
@@ -37,12 +31,12 @@ class UsersController < ApplicationController
 	    begin
         @user = User.find(params[:id])
 	    rescue ActiveRecord::RecordNotFound => e
-				render json: ErrorSerializer.new(e.message, 404).serialized_json, status: :not_found
+				render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
 	    end
     end
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-	    params.require(:user).permit(:firstname, :lastname, :email, :password_digest, :bio, :birthday, :phone)
+	    params.require(:user).permit(:bio, :phone, :profile_picture_path)
     end
 end
