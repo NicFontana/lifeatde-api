@@ -1,8 +1,9 @@
 module Pagination
-
   extend ActiveSupport::Concern
+
   included do
     include Pagy::Backend
+
     def pagination_options
       options = Hash.new
       options[:is_collection] = true
@@ -16,5 +17,6 @@ module Pagination
       }
       return options
     end
+
   end
 end
