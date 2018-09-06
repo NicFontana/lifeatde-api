@@ -19,6 +19,26 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.index ["name"], name: "index_categories_on_name", unique: true
   end
 
+  create_table "categories_projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "project_id"
+    t.bigint "category_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_categories_projects_on_category_id"
+    t.index ["project_id", "category_id"], name: "index_categories_projects_on_project_id_and_category_id"
+    t.index ["project_id"], name: "index_categories_projects_on_project_id"
+  end
+
+  create_table "categories_users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "category_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_categories_users_on_category_id"
+    t.index ["user_id", "category_id"], name: "index_categories_users_on_user_id_and_category_id"
+    t.index ["user_id"], name: "index_categories_users_on_user_id"
+  end
+
   create_table "courses", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -30,6 +50,7 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.bigint "news_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["course_id", "news_id"], name: "index_courses_news_on_course_id_and_news_id"
     t.index ["course_id"], name: "index_courses_news_on_course_id"
     t.index ["news_id"], name: "index_courses_news_on_news_id"
   end
@@ -50,15 +71,6 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "project_categories", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.bigint "project_id"
-    t.bigint "category_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["category_id"], name: "index_project_categories_on_category_id"
-    t.index ["project_id"], name: "index_project_categories_on_project_id"
-  end
-
   create_table "project_statuses", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -66,25 +78,24 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.index ["name"], name: "index_project_statuses_on_name", unique: true
   end
 
-  create_table "project_users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.bigint "project_id"
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["project_id"], name: "index_project_users_on_project_id"
-    t.index ["user_id"], name: "index_project_users_on_user_id"
-  end
-
   create_table "projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
     t.text "results"
-    t.bigint "user_id"
     t.bigint "project_status_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_status_id"], name: "index_projects_on_project_status_id"
-    t.index ["user_id"], name: "index_projects_on_user_id"
+  end
+
+  create_table "projects_users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "project_id"
+    t.bigint "user_id"
+    t.boolean "admin"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_projects_users_on_project_id"
+    t.index ["user_id"], name: "index_projects_users_on_user_id"
   end
 
   create_table "study_groups", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -96,15 +107,6 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.datetime "updated_at", null: false
     t.index ["course_id"], name: "index_study_groups_on_course_id"
     t.index ["user_id"], name: "index_study_groups_on_user_id"
-  end
-
-  create_table "user_categories", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.bigint "user_id"
-    t.bigint "category_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["category_id"], name: "index_user_categories_on_category_id"
-    t.index ["user_id"], name: "index_user_categories_on_user_id"
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -123,18 +125,17 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "categories_projects", "categories", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "categories_projects", "projects", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "categories_users", "categories", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "categories_users", "users", on_update: :cascade, on_delete: :cascade
   add_foreign_key "courses_news", "courses", on_update: :cascade, on_delete: :cascade
   add_foreign_key "courses_news", "news", on_update: :cascade, on_delete: :cascade
   add_foreign_key "documents", "projects", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "project_categories", "categories", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "project_categories", "projects", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "project_users", "projects", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "project_users", "users", on_update: :cascade, on_delete: :cascade
   add_foreign_key "projects", "project_statuses", on_update: :cascade, on_delete: :nullify
-  add_foreign_key "projects", "users", on_update: :cascade, on_delete: :nullify
+  add_foreign_key "projects_users", "projects", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "projects_users", "users", on_update: :cascade, on_delete: :cascade
   add_foreign_key "study_groups", "courses", on_update: :cascade, on_delete: :cascade
   add_foreign_key "study_groups", "users", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "user_categories", "categories", on_update: :cascade, on_delete: :cascade
-  add_foreign_key "user_categories", "users", on_update: :cascade, on_delete: :cascade
   add_foreign_key "users", "courses", on_update: :cascade, on_delete: :nullify
 end

@@ -5,6 +5,7 @@ class CreateCoursesNews < ActiveRecord::Migration[5.2]
       t.references :news, foreign_key: {on_delete: :cascade, on_update: :cascade}
 
       t.timestamps
+      t.index [:course_id, :news_id]
     end
   end
 end
