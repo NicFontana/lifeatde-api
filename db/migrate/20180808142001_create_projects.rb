@@ -4,7 +4,6 @@ class CreateProjects < ActiveRecord::Migration[5.2]
       t.string :title, null: false
       t.text :description, null: false
       t.text :results
-      t.references :user, foreign_key: {on_delete: :nullify, on_update: :cascade}
       t.references :project_status, foreign_key: {on_delete: :nullify, on_update: :cascade}
 
       t.timestamps

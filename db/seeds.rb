@@ -8,7 +8,7 @@ require 'faker'
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-categories = [
+categories_names = [
 		'Informatica',
 		'Web',
 		'Applicazioni Mobile',
@@ -29,7 +29,8 @@ categories = [
 		'Idraulica',
 		'Energie Alternative',
 ]
-categories.each {|name| Category.create({name: name}) }
+categories = []
+categories_names.each { |name| categories.push(Category.create({name: name})) }
 
 courses_names = [
 		'Ingegneria Elettronica e Informatica',
@@ -40,8 +41,8 @@ courses_names = [
 		'Ingegneria Civile',
 		'Ingegneria Meccanica LM'
 ]
-courses=[]
-courses_names.each {|name| courses.push(Course.create({name: name}))}
+courses = []
+courses_names.each { |name| courses.push(Course.create({name: name})) }
 
 statuses = [
 		'Aperto',
@@ -53,7 +54,7 @@ statuses.each {|name| ProjectStatus.create({name: name})}
 20.times do
 	firstname = Faker::Name.unique.first_name
 	lastname = Faker::Name.unique.last_name
-	user = User.create(
+	user = User.new(
 			{
 					firstname: firstname,
 					lastname: lastname,
@@ -67,24 +68,29 @@ statuses.each {|name| ProjectStatus.create({name: name})}
 			}
 	)
 	3.times do
-		user_category = UserCategory.create({user: user, category_id: Faker::Number.between(1, 19)})
+		user.categories << categories.sample
 	end
+	user.save!
 end
 
 5.times do |i|
-	project = Project.create(
+	project = Project.new(
 			{
 					project_status_id: 1,
-					user_id: i + 1,
 					title: Faker::Space.unique.galaxy,
 					description: Faker::Lorem.paragraph
 			}
 	)
-	ProjectCategory.create({project: project, category_id: Faker::Number.between(1, 19)})
+	project.categories << categories.sample
+	project.save!
 end
 
-5.times do |i|
-	ProjectUser.create({project_id: i, user_id: i + 6})
+10.times do |i|
+	project_user = ProjectsUser.create({project_id: (i % 5) + 1 , user_id: i + 6, admin: false})
+	if project_user.id % 2 == 0
+		project_user.admin = true
+	end
+	project_user.save!
 end
 
 25.times do
