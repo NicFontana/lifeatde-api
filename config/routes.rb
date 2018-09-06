@@ -1,13 +1,13 @@
 Rails.application.routes.draw do
-	scope 'api' do
-		resources :documents
-		resources :projects
-		resources :categories
-		resources :news
-		resources :study_groups
-		resources :courses
-		resources :users, only: [:index, :show, :update, :destroy]
-		post 'login', :to => 'authentication#login'
-	end
+  resources :documents
+  resources :projects
+  resources :categories
+  resources :study_groups
+  resources :courses do
+    resources :news, only: [:show]
+    get 'news', :to => 'news#course_news'
+  end
+  resources :users
+  post 'login', :to => 'authentication#login'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-	include Pagination
+  include Pagination
   before_action :set_user, only: [:show, :update, :destroy]
 
   # GET /usersz
