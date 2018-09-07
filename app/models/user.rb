@@ -1,15 +1,14 @@
 class User < ApplicationRecord
 	has_secure_password
-	validates :firstname, presence: true
-	validates :lastname, presence: true
-	validates :email, presence: true, uniqueness: true
+	validates :phone, numericality: { only_integer: true, message: 'Deve contenere solo numeri.' }
+	validates :profile_picture_path, format: { with: /\A(?:\/?|\\?+[\w-]+\/?|\\?)+[.]+[a-zA-Z]+\z/, message: 'Non è valido.' }
 
   belongs_to :course
 
   has_many :study_groups
 
-	has_many :project_users
-  has_many :projects_memberships, :through => :project_users, :source => :project
+	has_many :projects_users
+  has_many :projects_memberships, :through => :projects_users, :source => :project
 
 	has_and_belongs_to_many :categories
 end
