@@ -3,14 +3,18 @@ class ProjectsController < ApplicationController
 
   # GET /projects
   def index
-    @projects = Project.all
-
-    render json: @projects
+    begin
+      @projects = Project.user_related_projects(auth_user).order(created_at: :desc)
+    rescue ActiveRecord::RecordNotFound => e
+      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
+    end
+    @pagy = pagy(@projects)
+    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
   end
 
   # GET /projects/1
   def show
-    render json: @project
+    render json: ProjectSerializer.new(@project).serialized_json
   end
 
   # POST /projects
@@ -18,18 +22,18 @@ class ProjectsController < ApplicationController
     @project = Project.new(project_params)
 
     if @project.save
-      render json: @project, status: :created, location: @project
+      render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: @project.errors, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /projects/1
   def update
     if @project.update(project_params)
-      render json: @project
+      render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: @project.errors, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
@@ -38,14 +42,40 @@ class ProjectsController < ApplicationController
     @project.destroy
   end
 
+  # GET /category/category_id/projects
+  def category_projects
+    begin
+      @projects = Project.category_projects(params[:category_id]).order(created_at: :desc)
+    rescue ActiveRecord::RecordNotFound => e
+      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
+    end
+    @pagy = pagy(@projects)
+    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+  end
+
+  # GET /user/user_id/projects
+  def user_projects
+    begin
+      @projects = Project.user_projects(params[:user_id]).order(created_at: :desc)
+    rescue ActiveRecord::RecordNotFound => e
+      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
+    end
+    @pagy = pagy(@projects)
+    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      @project = Project.find(params[:id])
+      begin
+        @project = Project.find(params[:id])
+      rescue ActiveRecord::RecordNotFound => e
+        render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
+      end
     end
 
     # Only allow a trusted parameter "white list" through.
     def project_params
-      params.require(:project).permit(:title, :description, :results, :user_id, :status_id)
+      params.require(:project).permit(:title, :description, :results, :status_id)
     end
 end
