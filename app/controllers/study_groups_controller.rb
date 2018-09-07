@@ -1,11 +1,15 @@
 class StudyGroupsController < ApplicationController
+	include Pagination
   before_action :set_study_group, only: [:show, :update, :destroy]
 
   # GET /study_groups
   def index
-    @study_groups = StudyGroup.all
+    @pagy, @study_groups = pagy(StudyGroup.includes(:user).order(created_at: :desc).all)
 
-    render json: @study_groups
+    @serializer_options[:include] = [:user]
+    @serializer_options.merge!(pagination_options)
+
+    render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
 
   # GET /study_groups/1
