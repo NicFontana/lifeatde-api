@@ -42,6 +42,17 @@ class ProjectsController < ApplicationController
     @project.destroy
   end
 
+  # GET /projects?search=querystring
+  def search
+    begin
+      @projects = Project.get_project_by_querystring(params[:search]).order(created_at: :desc)
+    rescue ActiveRecord::RecordNotFound => e
+      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
+    end
+    @pagy = pagy(@projects)
+    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+  end
+
   # GET /category/category_id/projects
   def category_projects
     begin

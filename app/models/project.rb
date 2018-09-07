@@ -19,13 +19,16 @@ class Project < ApplicationRecord
 		joins(:members).where('users.id = ? AND projects_users.admin = 1', user_id)
 	end
 
-
 	def self.user_related_projects(auth_user)
 		projects = []
 		auth_user.categories.each do |category|
 			projects << joins(:categories).where('categories_projects.category_id = ?', category.id)
 		end
 		projects
+	end
+
+	def self.get_project_by_querystring(search)
+		where('projects.title LIKE ? ', "%#{search}%")
 	end
 
 end
