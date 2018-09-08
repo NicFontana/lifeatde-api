@@ -1,6 +1,10 @@
 class UserSerializer
   include FastJsonapi::ObjectSerializer
-  attributes :firstname, :lastname, :email, :bio, :birthday, :phone, :profile_picture_path
+
+  attributes :firstname, :lastname, :email, :bio, :birthday, :phone
+  attribute :avatar do |object|
+    Rails.application.routes.url_helpers.rails_blob_path(object.avatar, only_path: true)
+  end
 
   belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }
   has_many :projects, if: Proc.new { |record, params| record.association(:projects).loaded? }

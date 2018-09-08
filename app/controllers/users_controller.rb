@@ -9,6 +9,7 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/:id
   def update
+    puts rails_blob_path(@user.avatar, disposition: "attachment")
     unless @user.id == auth_user.id
       return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
     end
@@ -78,6 +79,6 @@ class UsersController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-	    params.require(:user).permit(:bio, :phone, :profile_picture_path)
+	    params.require(:user).permit(:bio, :phone, :avatar)
     end
 end
