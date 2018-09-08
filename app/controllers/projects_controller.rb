@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
   # GET /projects
   def index
     begin
-      @projects = Project.user_related_projects(auth_user).order(created_at: :desc)
+      @projects = Project.for_user(auth_user)
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -45,7 +45,7 @@ class ProjectsController < ApplicationController
   # GET /projects?search=querystring
   def search
     begin
-      @projects = Project.get_project_by_querystring(params[:search]).order(created_at: :desc)
+      @projects = Project.by_querystring(params[:search])
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -56,7 +56,7 @@ class ProjectsController < ApplicationController
   # GET /category/category_id/projects
   def category_projects
     begin
-      @projects = Project.category_projects(params[:category_id]).order(created_at: :desc)
+      @projects = Project.by_category(params[:category_id])
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -64,10 +64,14 @@ class ProjectsController < ApplicationController
     render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
   end
 
-  # GET /user/user_id/projects
+  # GET /user/user_id/projects?admin=1\0
   def user_projects
     begin
-      @projects = Project.user_projects(params[:user_id]).order(created_at: :desc)
+      if params[:admin].present?
+        @projects = Project.of_user_by_role(params[:user_id],params[:admin])
+      else
+        @projects = Project.of_user(params[:user_id])
+      end
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -87,6 +91,6 @@ class ProjectsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def project_params
-      params.require(:project).permit(:title, :description, :results, :status_id)
+      params.require(:project).permit(:title, :description, :results, :status_id, :admin)
     end
 end

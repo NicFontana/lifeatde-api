@@ -11,24 +11,24 @@ class Project < ApplicationRecord
 
 	has_many :documents
 
-	def self.category_projects(category_id)
-		left_outer_joins(:categories).where('categories.id = ?',category_id)
+	def self.by_category(category_id)
+		joins(:categories).where(categories: {id: category_id}).order(created_at: :desc)
 	end
 
-	def self.user_projects(user_id)
-		joins(:members).where('users.id = ? AND projects_users.admin = 1', user_id)
+	def of_user(user_id)
+		joins(:members).where(members: {id: user_id}).order(created_at: :desc)
 	end
 
-	def self.user_related_projects(auth_user)
-		projects = []
-		auth_user.categories.each do |category|
-			projects << joins(:categories).where('categories_projects.category_id = ?', category.id)
-		end
-		projects
+	def of_user_by_role(user_id,admin)
+		joins(members).where(members: {id: user_id}).where(projects_users: {admin: admin}).order(created_at: :desc)
 	end
 
-	def self.get_project_by_querystring(search)
-		where('projects.title LIKE ? ', "%#{search}%")
+	def self.for_user(auth_user)
+		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids}).order(created_at: :desc)
+	end
+
+	def self.by_querystring(search)
+		where('projects.title LIKE ? ', "%#{search}%").order(created_at: :desc)
 	end
 
 end
