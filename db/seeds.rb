@@ -63,7 +63,7 @@ statuses.each {|name| ProjectStatus.create({name: name})}
 					bio: Faker::Lorem.paragraph,
 					birthday: Faker::Date.birthday(19, 30),
 					phone: Faker::PhoneNumber.cell_phone,
-					profile_picture_path: '/path/to/pic',
+					profile_picture_path: '/path/to/pic.png',
 					course_id: Faker::Number.between(1, 7)
 			}
 	)
