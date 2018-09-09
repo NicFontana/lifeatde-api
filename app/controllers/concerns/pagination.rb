@@ -4,18 +4,18 @@ module Pagination
   included do
     include Pagy::Backend
 
-    def pagination_options
+    def pagination_options(pagy)
       options = Hash.new
       options[:is_collection] = true
       options[:meta] = {
-          items: @pagy.items,
-          pages: @pagy.pages,
-          next: @pagy.next,
-          self: @pagy.page,
-          prev: @pagy.prev,
-          last: @pagy.last
+          items: pagy.count == 0 ? 0 : pagy.items,
+          pages: pagy.pages,
+          next: pagy.next,
+          self: pagy.page,
+          prev: pagy.prev,
+          last: pagy.last
       }
-      return options
+      options
     end
 
   end
