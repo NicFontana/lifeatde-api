@@ -28,11 +28,7 @@ class UsersController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
-	    begin
-        @user = User.find(params[:id])
-	    rescue ActiveRecord::RecordNotFound => e
-				render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-	    end
+	    @user = User.find(params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.

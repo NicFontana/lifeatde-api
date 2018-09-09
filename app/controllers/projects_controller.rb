@@ -1,15 +1,12 @@
 class ProjectsController < ApplicationController
+	include Pagination
   before_action :set_project, only: [:show, :update, :destroy]
 
   # GET /projects
   def index
-    begin
-      @projects = Project.for_user(auth_user).order(created_at: :desc)
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-    end
-    @pagy = pagy(@projects)
-    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+    @pagy, @projects = pagy(Project.for_user(auth_user).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
   end
 
   # GET /projects/1
@@ -44,49 +41,33 @@ class ProjectsController < ApplicationController
 
   # GET /projects?search=querystring
   def search
-    begin
-      @projects = Project.by_querystring(params[:search]).order(created_at: :desc)
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-    end
-    @pagy = pagy(@projects)
-    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+    @pagy, @projects = pagy(Project.by_querystring(params[:search]).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
   end
 
   # GET /category/category_id/projects
   def category_projects
-    begin
-      @projects = Project.by_category(params[:category_id]).order(created_at: :desc)
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-    end
-    @pagy = pagy(@projects)
-    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+    @pagy, @projects= pagy(Project.by_category(params[:category_id]).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
   end
 
   # GET /user/user_id/projects?admin=1\0
   def user_projects
-    begin
-      if params[:admin].present?
-        @projects = Project.of_user_by_role(params[:user_id],params[:admin]).order(created_at: :desc)
-      else
-        @projects = Project.of_user(params[:user_id]).order(created_at: :desc)
-      end
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-    end
-    @pagy = pagy(@projects)
-    render json: ProjectSerializer.new(@projects, pagination_options).serialized_json
+	  if params[:admin].present?
+		  @pagy, @projects = pagy(Project.of_user_by_role(params[:user_id],params[:admin]).order(created_at: :desc))
+	  else
+		  @pagy, @projects = pagy(Project.of_user(params[:user_id]).order(created_at: :desc))
+	  end
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      begin
-        @project = Project.find(params[:id])
-      rescue ActiveRecord::RecordNotFound => e
-        render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
-      end
+	    @project = Project.find(params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.
