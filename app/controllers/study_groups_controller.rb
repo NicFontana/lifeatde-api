@@ -4,10 +4,10 @@ class StudyGroupsController < ApplicationController
 
   # GET /study_groups
   def index
-    @pagy, @study_groups = pagy(StudyGroup.includes(:user).order(created_at: :desc).all)
+    @pagy, @study_groups = pagy(StudyGroup.includes(:user).order(created_at: :desc))
 
     @serializer_options[:include] = [:user]
-    @serializer_options.merge!(pagination_options)
+    @serializer_options.merge!(pagination_options(@pagy))
 
     render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
