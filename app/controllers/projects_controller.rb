@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
   # GET /projects
   def index
     begin
-      @projects = Project.for_user(auth_user)
+      @projects = Project.for_user(auth_user).order(created_at: :desc)
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -45,7 +45,7 @@ class ProjectsController < ApplicationController
   # GET /projects?search=querystring
   def search
     begin
-      @projects = Project.by_querystring(params[:search])
+      @projects = Project.by_querystring(params[:search]).order(created_at: :desc)
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -56,7 +56,7 @@ class ProjectsController < ApplicationController
   # GET /category/category_id/projects
   def category_projects
     begin
-      @projects = Project.by_category(params[:category_id])
+      @projects = Project.by_category(params[:category_id]).order(created_at: :desc)
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found
     end
@@ -68,9 +68,9 @@ class ProjectsController < ApplicationController
   def user_projects
     begin
       if params[:admin].present?
-        @projects = Project.of_user_by_role(params[:user_id],params[:admin])
+        @projects = Project.of_user_by_role(params[:user_id],params[:admin]).order(created_at: :desc)
       else
-        @projects = Project.of_user(params[:user_id])
+        @projects = Project.of_user(params[:user_id]).order(created_at: :desc)
       end
     rescue ActiveRecord::RecordNotFound => e
       render json: ErrorSerializer.new(e.message, Rack::Utils.status_code(:not_found)).serialized_json, status: :not_found

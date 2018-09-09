@@ -12,23 +12,23 @@ class Project < ApplicationRecord
 	has_many :documents
 
 	def self.by_category(category_id)
-		joins(:categories).where(categories: {id: category_id}).order(created_at: :desc)
+		joins(:categories).where(categories: {id: category_id})
 	end
 
-	def of_user(user_id)
-		joins(:members).where(members: {id: user_id}).order(created_at: :desc)
+	def self.of_user(user_id)
+		joins(:members).where(members: {id: user_id})
 	end
 
-	def of_user_by_role(user_id,admin)
-		joins(members).where(members: {id: user_id}).where(projects_users: {admin: admin}).order(created_at: :desc)
+	def self.of_user_by_role(user_id,admin)
+		joins(members).where(members: {id: user_id}).where(projects_users: {admin: admin})
 	end
 
 	def self.for_user(auth_user)
-		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids}).order(created_at: :desc)
+		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids})
 	end
 
 	def self.by_querystring(search)
-		where('projects.title LIKE ? ', "%#{search}%").order(created_at: :desc)
+		where('projects.title LIKE ? ', "%#{search}%")
 	end
 
 end
