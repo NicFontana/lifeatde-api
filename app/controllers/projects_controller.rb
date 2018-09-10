@@ -56,12 +56,15 @@ class ProjectsController < ApplicationController
   # GET /user/user_id/projects?admin=1\0
   def user_projects
 	  if params[:admin].present?
-		  @pagy, @projects = pagy(Project.of_user_by_role(params[:user_id],params[:admin]).order(created_at: :desc))
+		  @pagy, @projects = pagy(Project.of_user_by_role(params[:user_id],params[:admin]).includes(:project_status).order(created_at: :desc))
 	  else
-		  @pagy, @projects = pagy(Project.of_user(params[:user_id]).order(created_at: :desc))
+		  @pagy, @projects = pagy(Project.of_user(params[:user_id]).includes(:project_status).order(created_at: :desc))
     end
 
-    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+    @serializer_options[:include] = [:project_status]
+    @serializer_options.merge!(pagination_options(@pagy))
+    puts @serializer_options
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
   # GET /user/user_id/projects/open
