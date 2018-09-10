@@ -63,7 +63,6 @@ class ProjectsController < ApplicationController
 
     @serializer_options[:include] = [:project_status]
     @serializer_options.merge!(pagination_options(@pagy))
-    puts @serializer_options
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
