@@ -4,9 +4,9 @@ class CategoriesController < ApplicationController
 
   # GET /categories
   def index
-    @pagy, @categories = pagy(Category.all)
+    @categories = Category.all
 
-    render json: CategorySerializer.new(@categories, pagination_options(@pagy)).serialized_json
+    render json: CategorySerializer.new(@categories).serialized_json
   end
 
   # GET /categories/:id
