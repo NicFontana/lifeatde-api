@@ -59,10 +59,32 @@ class ProjectsController < ApplicationController
 		  @pagy, @projects = pagy(Project.of_user_by_role(params[:user_id],params[:admin]).order(created_at: :desc))
 	  else
 		  @pagy, @projects = pagy(Project.of_user(params[:user_id]).order(created_at: :desc))
-	  end
+    end
 
     render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
   end
+
+  # GET /user/user_id/projects/open
+  def user_open_projects
+    @pagy, @projects = pagy(Project.open_of_user(params[:user_id]).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+  end
+
+  # GET /user/user_id/projects/closed
+  def user_closed_projects
+    @pagy, @projects = pagy(Project.closed_of_user(params[:user_id]).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+  end
+
+  # GET /user/user_id/projects/terminated
+  def user_terminated_projects
+    @pagy, @projects = pagy(Project.terminated_of_user(params[:user_id]).order(created_at: :desc))
+
+    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+  end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.
