@@ -4,9 +4,11 @@ class ProjectsController < ApplicationController
 
   # GET /projects
   def index
-    @pagy, @projects = pagy(Project.for_user(auth_user).order(created_at: :desc))
+    @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admin).order(created_at: :desc))
 
-    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+    @serializer_options[:include] = [:admin]
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
   # GET /projects/1
@@ -55,36 +57,52 @@ class ProjectsController < ApplicationController
 
   # GET /user/user_id/projects?admin=1\0
   def user_projects
+    user_id = params[:user_id]
 	  if params[:admin].present?
-		  @pagy, @projects = pagy(Project.of_user_by_role(params[:user_id],params[:admin]).includes(:project_status).order(created_at: :desc))
+      admin = params[:admin]
+      if admin
+        @pagy, @projects = pagy(User.find(user_id).created_projects.includes(:projects_users, :project_status).order(created_at: :desc))
+      else
+        @pagy, @projects = pagy(User.find(user_id).joined_projects.includes(:projects_users, :project_status).order(created_at: :desc))
+      end
 	  else
-		  @pagy, @projects = pagy(Project.of_user(params[:user_id]).includes(:project_status).order(created_at: :desc))
+      @pagy, @projects =pagy(User.find(user_id).all_projects.includes(:projects_users, :project_status).order(created_at: :desc))
     end
 
-    @serializer_options[:include] = [:project_status]
+    @serializer_options[:params] = { user_id: user_id }
     @serializer_options.merge!(pagination_options(@pagy))
+
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
   # GET /user/user_id/projects/open
   def user_open_projects
-    @pagy, @projects = pagy(Project.open_of_user(params[:user_id]).order(created_at: :desc))
+    user_id = params[:user_id]
+    @pagy, @projects = pagy(User.find(user_id).all_projects.open.includes(:projects_users).order(created_at: :desc))
 
-    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+    @serializer_options[:params] = {user_id: user_id }
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
   # GET /user/user_id/projects/closed
   def user_closed_projects
-    @pagy, @projects = pagy(Project.closed_of_user(params[:user_id]).order(created_at: :desc))
+    user_id = params[:user_id]
+    @pagy, @projects = pagy(User.find(user_id).all_projects.closed.includes(:projects_users).order(created_at: :desc))
 
-    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+    @serializer_options[:params] = {user_id: user_id }
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
   # GET /user/user_id/projects/terminated
   def user_terminated_projects
-    @pagy, @projects = pagy(Project.terminated_of_user(params[:user_id]).order(created_at: :desc))
+    user_id = params[:user_id]
+    @pagy, @projects = pagy(User.find(user_id).all_projects.terminated.includes(:projects_users).order(created_at: :desc))
 
-    render json: ProjectSerializer.new(@projects, pagination_options(@pagy)).serialized_json
+    @serializer_options[:params] = {user_id: user_id }
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
 

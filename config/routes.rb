@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 	scope :api do
 		resources :documents
 		resources :projects
+    get 'pippo/:user_id', :to => 'projects#index'
 		resources :categories
 		resources :study_groups
 		resources :courses do
