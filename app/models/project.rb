@@ -11,7 +11,7 @@ class Project < ApplicationRecord
   belongs_to :project_status
 
 	has_many :projects_users
-	has_many :members, :through => :projects_users, :source => :user, inverse_of: :all_projects
+	has_many :members, :through => :projects_users, :source => :user, inverse_of: :projects
 	has_many :collaborators, -> {where(projects_users: {admin: false})}, :through => :projects_users, :source => :user, inverse_of: :joined_projects
 	has_many :admins, -> {where(projects_users: {admin: true})}, :through => :projects_users, :source => :user, inverse_of: :created_projects
 

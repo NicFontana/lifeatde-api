@@ -27,7 +27,7 @@ class ProjectsController < ApplicationController
   # POST /projects
   def create
     @project = Project.new(project_params)
-    @project.projects_users.build(is_admin: true, user_id: auth_user.id)
+    @project.projects_users.build(admin: true, user_id: auth_user.id)
 
     if @project.save
       render json: ProjectSerializer.new(@project).serialized_json
@@ -62,7 +62,7 @@ class ProjectsController < ApplicationController
   # GET /user/user_id/projects?status=&admin=1\0
   def user_projects
     user_id = params[:user_id]
-    admin = params[:is_admin]
+    admin = params[:admin]
     status = params[:status]
 
     case admin
