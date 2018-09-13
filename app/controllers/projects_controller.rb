@@ -6,9 +6,9 @@ class ProjectsController < ApplicationController
   # GET /projects?search=query
   def index
     if params[:search].present?
-      @pagy, @projects = pagy(Project.by_querystring(params[:search]).includes(admins: [:projects_users]).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.by_querystring(params[:search]).includes(:admins, :project_status).order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status).order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]
@@ -18,7 +18,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1
   def show
-    @project = Project.includes(members: [:projects_users]).find(params[:id])
+    @project = Project.includes(:project_status, members: [:projects_users]).find(params[:id])
     @serializer_options[:include] = [:members]
     @serializer_options[:params] = { project_id: params[:id] }
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -27,7 +27,7 @@ class ProjectsController < ApplicationController
   # POST /projects
   def create
     @project = Project.new(project_params)
-    @project.projects_users.build(admin: true, user_id: auth_user.id)
+    @project.projects_users.build(is_admin: true, user_id: auth_user.id)
 
     if @project.save
       render json: ProjectSerializer.new(@project).serialized_json
@@ -52,7 +52,7 @@ class ProjectsController < ApplicationController
 
   # GET /category/category_id/projects
   def category_projects
-    @pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(admins: [:projects_users]).order(created_at: :desc))
+    @pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(:admins, :project_status).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -62,7 +62,7 @@ class ProjectsController < ApplicationController
   # GET /user/user_id/projects?status=&admin=1\0
   def user_projects
     user_id = params[:user_id]
-    admin = params[:admin]
+    admin = params[:is_admin]
     status = params[:status]
 
     case admin
@@ -98,6 +98,6 @@ class ProjectsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def project_params
-      params.require(:project).permit(:title, :description, :results, :project_status_id, :admins, :members)
+      params.require(:project).permit(:title, :description, :results, :project_status_id)
     end
 end

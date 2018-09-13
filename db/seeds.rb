@@ -86,7 +86,7 @@ end
 end
 
 10.times do |i|
-	project_user = ProjectsUser.create({project_id: (i % 5) + 1 , user_id: i + 6, admin: false})
+	project_user = ProjectsUser.create({project_id: (i % 5) + 1 , user_id: i + 6, is_admin: false})
 	if project_user.id % 2 == 0
 		project_user.admin = true
 	end

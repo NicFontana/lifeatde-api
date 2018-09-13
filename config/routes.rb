@@ -12,9 +12,6 @@ Rails.application.routes.draw do
 		end
 		resources :users do
       get 'projects', :to => 'projects#user_projects'
-      get 'projects/open', :to => 'projects#user_open_projects'
-			get 'projects/closed', :to => 'projects#user_closed_projects'
-			get 'projects/terminated', :to => 'projects#user_open_projects'
     end
 		post 'login', :to => 'authentication#login'
 	end
