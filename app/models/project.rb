@@ -28,10 +28,10 @@ class Project < ApplicationRecord
 	end
 
 	def self.by_querystring(search)
-		where('projects.title LIKE ? OR projects. description LIKE ?', "%#{search}%", "%#{search}%")
+		where('projects.title LIKE ? OR projects.description LIKE ?', "%#{search}%", "%#{search}%")
 	end
 
-	def self.for_user(auth_user)
-		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids})
+	def self.for_user(user)
+		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
 	end
 end
