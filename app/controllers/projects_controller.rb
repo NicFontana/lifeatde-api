@@ -6,7 +6,7 @@ class ProjectsController < ApplicationController
   # GET /projects?search=query
   def index
     if params[:search].present?
-      @pagy, @projects = pagy(Project.by_querystring(params[:search]).includes(:admins, :project_status, :categories).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.matching(params[:search]).includes(:admins, :project_status, :categories).order(created_at: :desc))
     else
       @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status, :categories).order(created_at: :desc))
     end
@@ -42,17 +42,16 @@ class ProjectsController < ApplicationController
 
   # PATCH/PUT /projects/1
   def update
-    if auth_user.id == @project.admins.first.id
+    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto.", Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
+    end
 
-      @categories = Category.find(params[:project][:categories])
+    @categories = Category.find(params[:project][:categories])
 
-      if @project.update(project_params)
-        @project.categories = @categories
+    if @project.update(project_params)
+      @project.categories = @categories
 
-        render json: ProjectSerializer.new(@project).serialized_json
-      else
-        render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
-      end
+      render json: ProjectSerializer.new(@project).serialized_json
     else
       render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
@@ -60,17 +59,15 @@ class ProjectsController < ApplicationController
 
   # DELETE /projects/1
   def destroy
-    if auth_user.id == @project.admins.first.id
-      @project.destroy
-    else
-      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
-
+    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto.", Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
     end
+
+    @project.destroy
   end
 
   # GET /category/category_id/projects
   def category_projects
-    #@pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(:admins, :project_status).order(created_at: :desc))
     @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]

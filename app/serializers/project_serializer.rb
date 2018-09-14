@@ -7,8 +7,6 @@ class ProjectSerializer
   has_many :members, serializer: :user, record_type: :user, if: Proc.new { |record, params| record.association(:members).loaded? }
   has_many :documents, if: Proc.new { |record, params| record.association(:documents).loaded? }
 
-  has_many :categories, if: Proc.new { |record, params| record.association(:categories).loaded? }
-
   attribute :is_admin, if: Proc.new { |record, params| params && params[:user_id].present? && record.association(:projects_users).loaded? } do |project, params|
     project.projects_users.detect{ |record| record.user_id == params[:user_id].to_i }.admin
   end
@@ -16,7 +14,7 @@ class ProjectSerializer
     project.project_status.name
   end
 
-  attribute :categories do |project, params|
+  attribute :categories, if: Proc.new { |record, params| record.association(:categories).loaded? } do |project, params|
     categories = []
     project.categories.each do |category|
       categories << category.name

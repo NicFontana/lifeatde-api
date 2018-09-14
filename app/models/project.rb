@@ -1,6 +1,6 @@
 class Project < ApplicationRecord
-	validates :title, presence: true
-	validates :description, presence: true
+	validates :title, presence: { message: 'Il progetto deve avere un titolo.' }
+	validates :description, presence: { message: 'Il progetto deve avere una descrizione.' }
 
 	statuses = {
 			open: 1,
@@ -23,9 +23,7 @@ class Project < ApplicationRecord
 	scope :closed, -> { where(project_status_id: statuses[:closed]) }
 	scope :terminated, -> { where(project_status_id: statuses[:terminated]) }
 
-	def self.by_querystring(search)
-		where('projects.title LIKE ? OR projects. description LIKE ?', "%#{search}%", "%#{search}%")
-	end
+	scope :matching, -> (querystring) {where('projects.title LIKE ? OR projects. description LIKE ?', "%#{querystring}%", "%#{querystring}%")}
 
 	def self.for_user(auth_user)
 		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids})
