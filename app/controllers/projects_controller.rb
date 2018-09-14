@@ -42,8 +42,17 @@ class ProjectsController < ApplicationController
 
   # PATCH/PUT /projects/1
   def update
-    if @project.update(project_params)
-      render json: ProjectSerializer.new(@project).serialized_json
+    if auth_user.id == @project.admins.first.id
+
+      @categories = Category.find(params[:project][:categories])
+
+      if @project.update(project_params)
+        @project.categories = @categories
+
+        render json: ProjectSerializer.new(@project).serialized_json
+      else
+        render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      end
     else
       render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
@@ -51,7 +60,12 @@ class ProjectsController < ApplicationController
 
   # DELETE /projects/1
   def destroy
-    @project.destroy
+    if auth_user.id == @project.admins.first.id
+      @project.destroy
+    else
+      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+
+    end
   end
 
   # GET /category/category_id/projects
