@@ -51,7 +51,7 @@ class UsersController < ApplicationController
       return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    project.collaborators.destroy(to_be_destroyed)
+    project.members.delete(to_be_destroyed)
 
     render json: UserSerializer.new(project.members.includes(:projects_users), @serializer_options).serialized_json
   end
