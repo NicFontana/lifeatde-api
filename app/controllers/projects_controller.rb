@@ -70,7 +70,8 @@ class ProjectsController < ApplicationController
 
   # GET /category/category_id/projects
   def category_projects
-    @pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(:admins, :project_status).order(created_at: :desc))
+    #@pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(:admins, :project_status).order(created_at: :desc))
+    @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))

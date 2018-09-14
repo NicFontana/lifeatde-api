@@ -4,7 +4,7 @@ class CreateCategoriesProjects < ActiveRecord::Migration[5.2]
       t.references :project, foreign_key: {on_delete: :cascade, on_update: :cascade}
       t.references :category, foreign_key: {on_delete: :cascade, on_update: :cascade}
 
-      t.index [:project_id, :category_id]
+      t.index [:project_id, :category_id], unique: true
     end
   end
 end

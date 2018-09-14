@@ -23,10 +23,6 @@ class Project < ApplicationRecord
 	scope :closed, -> { where(project_status_id: statuses[:closed]) }
 	scope :terminated, -> { where(project_status_id: statuses[:terminated]) }
 
-	def self.by_category(category_id)
-		joins(:categories).where(categories: {id: category_id})
-	end
-
 	def self.by_querystring(search)
 		where('projects.title LIKE ? OR projects. description LIKE ?', "%#{search}%", "%#{search}%")
 	end
