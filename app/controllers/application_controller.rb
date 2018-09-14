@@ -9,7 +9,7 @@ class ApplicationController < ActionController::API
 	end
 
 	def create_serializer_options
-		@serializer_options = { include: [], params: {} }
+		@serializer_options = { include: [], params: {}, meta: {} }
 	end
 
 	# Sets the @current_user with the user_id from token payload

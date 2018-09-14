@@ -1,5 +1,5 @@
 class StudyGroupsController < ApplicationController
-	include Pagination
+	include Pagination, Rack::Utils
   before_action :set_study_group, only: [:update, :destroy]
 
 	# GET /course/:course_id/study_groups
@@ -32,32 +32,39 @@ class StudyGroupsController < ApplicationController
 	    @serializer_options[:include] = [:user, :course]
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json, status: :created
     else
-      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /study_groups/1
   def update
 	  unless @study_group.user.id == auth_user.id
-		  return render json: ErrorSerializer.new('Non puoi aggiornare informazioni su un gruppo di studio non tuo', Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi aggiornare informazioni su un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
     if @study_group.update(study_group_params)
 	    @serializer_options[:include] = [:user, :course]
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
     else
-      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # DELETE /study_groups/1
   def destroy
-	  unless @study_group.user.id == auth_user.id
-		  return render json: ErrorSerializer.new('Non puoi eliminare un gruppo di studio non tuo', Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
+	  user = auth_user
+	  unless @study_group.user.id == user.id
+		  return render json: ErrorSerializer.new('Non puoi eliminare un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  @study_group.destroy
-	  render json: SuccessSerializer.new('Gruppo di studio eliminato con successo!', Rack::Utils.status_code(:ok)).serialized_json
+	  @pagy, @study_groups = pagy(user.study_groups.includes(:course))
+
+	  @serializer_options.merge!(pagination_options(@pagy))
+	  @serializer_options[:include] = [:user, :course]
+	  @serializer_options[:meta][:message] = 'Gruppo di studio eliminato con successo!'
+
+	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
 
 	def search
