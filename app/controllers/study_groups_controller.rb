@@ -4,7 +4,7 @@ class StudyGroupsController < ApplicationController
 
 	# GET /course/:course_id/study_groups
   def index
-	  @pagy, @study_groups= pagy(Course.find(params[:course_id]).study_groups.includes(:user, :course).order(created_at: :desc))
+	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user, :course).order(created_at: :desc))
 
 	  @serializer_options[:include] = [:user, :course]
 	  @serializer_options.merge!(pagination_options(@pagy))
@@ -23,7 +23,7 @@ class StudyGroupsController < ApplicationController
 
   # POST /course/:course_id/study_groups
   def create
-	  course = Course.find(params[:course_id])
+	  @course = Course.find(params[:course_id])
     @study_group = StudyGroup.new(study_group_params)
     @study_group.user = auth_user
     @study_group.course = course
@@ -52,13 +52,13 @@ class StudyGroupsController < ApplicationController
 
   # DELETE /study_groups/1
   def destroy
-	  user = auth_user
-	  unless @study_group.user.id == user.id
+	  @user = auth_user
+	  unless @study_group.user.id == @user.id
 		  return render json: ErrorSerializer.new('Non puoi eliminare un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  @study_group.destroy
-	  @pagy, @study_groups = pagy(user.study_groups.includes(:course))
+	  @pagy, @study_groups = pagy(@user.study_groups.includes(:course))
 
 	  @serializer_options.merge!(pagination_options(@pagy))
 	  @serializer_options[:include] = [:user, :course]
