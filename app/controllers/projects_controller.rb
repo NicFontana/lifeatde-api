@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-	include Pagination
+	include Pagination, Rack::Utils
   before_action :set_project, only: [:update, :destroy]
 
   # GET /projects
@@ -36,14 +36,14 @@ class ProjectsController < ApplicationController
       @project.categories << @categories
       render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /projects/1
   def update
     unless @project.admins.detect{ |admin| admin.id == auth_user.id}
-      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @categories = Category.find(params[:project][:categories])
@@ -53,14 +53,14 @@ class ProjectsController < ApplicationController
 
       render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # DELETE /projects/1
   def destroy
     unless @project.admins.detect{ |admin| admin.id == auth_user.id}
-      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @project.destroy
