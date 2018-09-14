@@ -5,11 +5,12 @@ Rails.application.routes.draw do
     resources :categories do
       get 'projects', :to => 'projects#category_projects'
     end
-		resources :study_groups
 		resources :courses do
+			resources :study_groups, shallow: true
 			resources :news, only: [:show]
 			get 'news', :to => 'news#course_news'
 		end
+		get 'study_groups', :to => 'study_groups#search'
 		resources :users do
       get 'projects', :to => 'projects#user_projects'
     end

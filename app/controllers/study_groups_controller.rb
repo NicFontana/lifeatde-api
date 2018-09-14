@@ -2,14 +2,15 @@ class StudyGroupsController < ApplicationController
 	include Pagination
   before_action :set_study_group, only: [:update, :destroy]
 
-  # GET /study_groups
+	# GET /course/:course_id/study_groups
   def index
-    @pagy, @study_groups = pagy(StudyGroup.for_user(auth_user).includes(:user, :course).order(created_at: :desc))
+	  course = Course.find(params[:course_id])
+	  @pagy, @study_groups= pagy(course.study_groups.includes(:user, :course).order(created_at: :desc))
 
-    @serializer_options[:include] = [:user, :course]
-    @serializer_options.merge!(pagination_options(@pagy))
+	  @serializer_options[:include] = [:user, :course]
+	  @serializer_options.merge!(pagination_options(@pagy))
 
-    render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
 
   # GET /study_groups/1
@@ -21,19 +22,20 @@ class StudyGroupsController < ApplicationController
     render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
   end
 
-  # POST /study_groups
+  # POST /course/:course_id/study_groups
   def create
-	  user = auth_user
+	  course = Course.find(params[:course_id])
+
     @study_group = StudyGroup.new(study_group_params)
-    @study_group.user = user
-    @study_group.course = user.course
+    @study_group.user = auth_user
+    @study_group.course = course
 
     if @study_group.save
 	    @serializer_options[:include] = [:user, :course]
 
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json, status: :created
     else
-      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)), status: :unprocessable_entity
+      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
@@ -45,7 +47,7 @@ class StudyGroupsController < ApplicationController
 
 	      render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
 	    else
-	      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)), status: :unprocessable_entity
+	      render json: ErrorSerializer.new(@study_group.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
 	    end
 	  else
 		  render json: ErrorSerializer.new('You cannot update a study group that is not your', Rack::Utils.status_code(:forbidden)).serialized_json, status: :forbidden
@@ -63,6 +65,18 @@ class StudyGroupsController < ApplicationController
 	  end
   end
 
+	def search
+		if params[:search].present?
+			@pagy, @study_groups = pagy(StudyGroup.matching(params[:search]).includes(:user, :course).order(created_at: :desc))
+		else
+			@pagy, @study_groups = pagy(StudyGroup.includes(:user, :course).order(created_at: :desc))
+		end
+
+		@serializer_options[:include] = [:user, :course]
+		@serializer_options.merge!(pagination_options(@pagy))
+		render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_study_group
@@ -71,6 +85,6 @@ class StudyGroupsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def study_group_params
-      params.require(:study_group).permit(:title, :description)
+      params.require(:study_group).permit(:title, :description, :course_id)
     end
 end
