@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
 	scope :api do
 		resources :documents
-		resources :projects
+		resources :projects do
+			get 'members', :to => 'users#members_index'
+			post 'members', :to => 'users#members_create'
+			delete 'members/:id', :to => 'users#members_destroy'
+		end
     resources :categories do
       get 'projects', :to => 'projects#category_projects'
     end
@@ -12,6 +16,9 @@ Rails.application.routes.draw do
 		end
 		resources :users do
       get 'projects', :to => 'projects#user_projects'
+			get 'joined_projects', :to => 'projects#joined_projects_index'
+			post 'joined_projects', :to => 'projects#joined_projects_create'
+			delete 'joined_projects/:id', :to => 'projects#joined_projects_destroy'
     end
 		post 'login', :to => 'authentication#login'
 	end

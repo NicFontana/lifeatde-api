@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   include Pagination
   include Rack::Utils
-  before_action :set_user, only: [:show, :update, :destroy]
+  before_action :set_user, only: [:show, :update]
 
   # GET /users/:id
   def show
@@ -11,7 +11,7 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/:id
   def update
     unless @user.id == auth_user.id
-      return render json: ErrorSerializer.new('You can update only your profile', status_code(:forbidden)).serialized_json, status: :forbidden
+      return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     if @user.update(user_params)
@@ -21,26 +21,38 @@ class UsersController < ApplicationController
     end
   end
 
-  # POST /projects/:project_id/users/:id/add_member
-  def add
-    @member = @user.projects_users.new(project_id: params[:project_id], admin: false)
+  # POST /projects/:project_id/members
+  def members_create
+    @project = Project.find(params[:project_id])
+    @collaborators = User.find(params[:users][:ids])
 
-    if @member.save
-      render json: UserSerializer.new(@user).serialized_json
+    if @project.collaborators << @collaborators
+      render json: UserSerializer.new(@collaborators).serialized_json
     else
-      render json: ErrorSerializer.new(@user.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@collaborators.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
-  # DELETE /projects/:project_id/users/:id/add_member
-  def remove
-    @member = @user.projects_users.where(project_id: params[:project_id], admin: false)
+  # DELETE /projects/:project_id/members/:id
+  def members_destroy
+    @project = Project.find(params[:project_id])
+    @collaborators = @project.collaborators
 
-    if @member.destroy_all
-      render json: UserSerializer.new(@user).serialized_json
+    if @collaborators.destroy(params[:id])
+      render json: UserSerializer.new(@collaborators).serialized_json
     else
-      render json: ErrorSerializer.new(@user.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@collaborators.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
+  end
+
+  # GET /projects/:id/members
+  def members_index
+    @pagy, @members = pagy(Project.find(params[:project_id]).members.includes(:projects_users))
+
+    @serializer_options[:params] = {project_id: params[:project_id]}
+    @serializer_options.merge!(pagination_options(@pagy))
+
+    render json: UserSerializer.new(@members, @serializer_options).serialized_json
   end
 
   private

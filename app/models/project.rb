@@ -34,4 +34,5 @@ class Project < ApplicationRecord
 	def self.for_user(auth_user)
 		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids})
 	end
+
 end

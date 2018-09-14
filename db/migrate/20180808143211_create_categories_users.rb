@@ -4,7 +4,7 @@ class CreateCategoriesUsers < ActiveRecord::Migration[5.2]
       t.references :user, foreign_key: {on_delete: :cascade, on_update: :cascade}
       t.references :category, foreign_key: {on_delete: :cascade, on_update: :cascade}
 
-      t.index [:user_id, :category_id]
+      t.index [:user_id, :category_id], unique: true
     end
   end
 end
