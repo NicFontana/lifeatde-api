@@ -14,7 +14,8 @@ class UsersController < ApplicationController
     end
 
     if @user.update(user_params)
-      render json: UserSerializer.new(@user).serialized_json
+      @serializer_options[:meta][:message] = 'Utente aggiornato con successo!'
+      render json: UserSerializer.new(@user, @serializer_options).serialized_json
     else
 			render json: ErrorSerializer.new(@user.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
@@ -27,6 +28,7 @@ class UsersController < ApplicationController
     current_user = auth_user
 
     @serializer_options[:params] = {project_id: params[:project_id]}
+    @serializer_options[:meta][:message] = 'Membro aggiunto con successo!'
 
     unless project.admins.detect {|admin| admin.id == current_user.id }
       return render json: ErrorSerializer.new('Non puoi aggiungere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
@@ -46,6 +48,7 @@ class UsersController < ApplicationController
     current_user = auth_user
 
     @serializer_options[:params] = {project_id: params[:project_id]}
+    @serializer_options[:meta][:message] = 'Membro eliminato con successo!'
 
     unless project.admins.detect {|admin| admin.id == current_user.id }
       return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
