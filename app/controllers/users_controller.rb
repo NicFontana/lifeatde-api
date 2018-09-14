@@ -23,25 +23,39 @@ class UsersController < ApplicationController
 
   # POST /projects/:project_id/members
   def members_create
-    @project = Project.find(params[:project_id])
-    @collaborators = User.find(params[:users][:ids])
+    project = Project.includes(:admins).find(params[:project_id])
+    collaborators = User.find(params[:users][:ids])
+    current_user = auth_user
 
-    if @project.collaborators << @collaborators
-      render json: UserSerializer.new(@collaborators).serialized_json
+    @serializer_options[:params] = {project_id: params[:project_id]}
+
+    unless project.admins.detect {|admin| admin.id == current_user.id }
+      return render json: ErrorSerializer.new('Non puoi aggiungere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
+    if project.collaborators << collaborators
+      render json: UserSerializer.new(project.members.includes(:projects_users), @serializer_options).serialized_json
     else
-      render json: ErrorSerializer.new(@collaborators.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # DELETE /projects/:project_id/members/:id
   def members_destroy
-    @project = Project.find(params[:project_id])
-    @collaborators = @project.collaborators
+    project = Project.find(params[:project_id])
+    collaborators = project.collaborators
+    current_user = auth_user
 
-    if @collaborators.destroy(params[:id])
-      render json: UserSerializer.new(@collaborators).serialized_json
+    @serializer_options[:params] = {project_id: params[:project_id]}
+
+    unless project.admins.detect {|admin| admin.id == current_user.id }
+      return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
+    if collaborators.destroy(params[:id])
+      render json: UserSerializer.new(project.members.includes(:projects_users), @serializer_options).serialized_json
     else
-      render json: ErrorSerializer.new(@collaborators.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
