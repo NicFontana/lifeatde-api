@@ -1,6 +1,5 @@
 class UsersController < ApplicationController
-  include Pagination
-  include Rack::Utils
+  include Pagination, Rack::Utils
   before_action :set_user, only: [:show, :update]
 
   # GET /users/:id
@@ -40,10 +39,10 @@ class UsersController < ApplicationController
     end
   end
 
-  # DELETE /projects/:project_id/members/:id
+  # DELETE /projects/:project_id/members
   def members_destroy
     project = Project.find(params[:project_id])
-    collaborators = project.collaborators
+    to_be_destroyed = User.find(params[:user][:ids])
     current_user = auth_user
 
     @serializer_options[:params] = {project_id: params[:project_id]}
@@ -52,11 +51,9 @@ class UsersController < ApplicationController
       return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    if collaborators.destroy(params[:id])
-      render json: UserSerializer.new(project.members.includes(:projects_users), @serializer_options).serialized_json
-    else
-      render json: ErrorSerializer.new(project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
-    end
+    project.collaborators.destroy(to_be_destroyed)
+
+    render json: UserSerializer.new(project.members.includes(:projects_users), @serializer_options).serialized_json
   end
 
   # GET /projects/:id/members

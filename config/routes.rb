@@ -4,7 +4,7 @@ Rails.application.routes.draw do
     resources :projects do
       get 'members', :to => 'users#members_index'
       post 'members', :to => 'users#members_create'
-      delete 'members/:id', :to => 'users#members_destroy'
+      delete 'members', :to => 'users#members_destroy'
     end
     resources :categories do
       get 'projects', :to => 'projects#category_projects'
