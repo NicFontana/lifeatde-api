@@ -1,6 +1,6 @@
 class Project < ApplicationRecord
-	validates :title, presence: { message: 'Il progetto deve avere un titolo.' }
-	validates :description, presence: { message: 'Il progetto deve avere una descrizione.' }
+	validates :title, presence: { message: 'Il progetto deve avere un titolo' }
+	validates :description, presence: { message: 'Il progetto deve avere una descrizione' }
 
 	statuses = {
 			open: 1,

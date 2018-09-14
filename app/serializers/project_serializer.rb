@@ -14,7 +14,7 @@ class ProjectSerializer
     project.project_status.name
   end
 
-  attribute :categories, if: Proc.new { |record, params| record.association(:categories).loaded? } do |project, params|
+  attribute :categories do |project, params|
     categories = []
     project.categories.each do |category|
       categories << category.name
