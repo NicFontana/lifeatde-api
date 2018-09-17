@@ -12,7 +12,7 @@ class StudyGroupsController < ApplicationController
 	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
 
-  # GET /study_groups/1
+  # GET /study_groups/:id
   def show
     @study_group = StudyGroup.includes(:user, :course).find(params[:id])
 
@@ -38,14 +38,13 @@ class StudyGroupsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /study_groups/1
+  # PATCH/PUT /study_groups/:id
   def update
 	  unless @study_group.user.id == auth_user.id
 		  return render json: ErrorSerializer.new('Non puoi aggiornare il gruppo di studio se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
     if @study_group.update(study_group_params)
-	    @serializer_options[:include] = [:user]
 	    @serializer_options[:meta][:message] = 'Gruppo di studio aggiornato con successo!'
 
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
@@ -54,7 +53,7 @@ class StudyGroupsController < ApplicationController
     end
   end
 
-  # DELETE /study_groups/1
+  # DELETE /study_groups/:id
   def destroy
 	  @user = auth_user
 	  unless @study_group.user.id == @user.id
@@ -62,13 +61,10 @@ class StudyGroupsController < ApplicationController
 	  end
 
 	  @study_group.destroy
-	  @pagy, @study_groups = pagy(@user.study_groups.includes(:course))
 
-	  @serializer_options.merge!(pagination_options(@pagy))
-	  @serializer_options[:include] = [:user]
 	  @serializer_options[:meta][:message] = 'Gruppo di studio eliminato con successo!'
 
-	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	  render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
   end
 
 	def search

@@ -1,5 +1,4 @@
 class CategoriesController < ApplicationController
-  include Pagination
   before_action :set_category, only: [:index, :show]
 
   # GET /categories
