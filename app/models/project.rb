@@ -1,6 +1,6 @@
 class Project < ApplicationRecord
-	validates :title, presence: {message: "Questo campo non può essere vuoto"}
-	validates :description, presence: {message: "Questo campo non può essere vuoto"}
+	validates :title, presence: {message: 'Questo campo non può essere vuoto'}
+	validates :description, presence: {message: 'Questo campo non può essere vuoto'}
 
 	statuses = {
 			open: 1,

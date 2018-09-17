@@ -1,5 +1,5 @@
 class StudyGroupsController < ApplicationController
-	include Pagination, Rack::Utils
+	include Pagination
   before_action :set_study_group, only: [:update, :destroy]
 
 	# GET /course/:course_id/study_groups
@@ -41,7 +41,7 @@ class StudyGroupsController < ApplicationController
   # PATCH/PUT /study_groups/1
   def update
 	  unless @study_group.user.id == auth_user.id
-		  return render json: ErrorSerializer.new('Non puoi aggiornare informazioni su un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi aggiornare il gruppo di studio se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
     if @study_group.update(study_group_params)
@@ -58,7 +58,7 @@ class StudyGroupsController < ApplicationController
   def destroy
 	  @user = auth_user
 	  unless @study_group.user.id == @user.id
-		  return render json: ErrorSerializer.new('Non puoi eliminare un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi eliminare il gruppo di studio se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  @study_group.destroy

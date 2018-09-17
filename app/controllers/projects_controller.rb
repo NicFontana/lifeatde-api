@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-	include Pagination, Rack::Utils
+	include Pagination
   before_action :set_project, only: [:update, :destroy]
 
   # GET /projects
@@ -13,37 +13,40 @@ class ProjectsController < ApplicationController
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
+
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
-  # GET /projects/1
+  # GET /projects/:id
   def show
     @project = Project.includes(:project_status, :categories, members: [:projects_users]).find(params[:id])
+
     @serializer_options[:include] = [:members]
     @serializer_options[:params] = { project_id: params[:id] }
+
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
 
   # POST /projects
   def create
     @categories = Category.find(params[:project][:categories])
-
     @project = Project.new(project_params)
 
     @project.projects_users.build(admin: true, user_id: auth_user.id)
 
-    if @project.save
-      @project.categories << @categories
-      render json: ProjectSerializer.new(@project).serialized_json
+    if @project.save && @project.categories << @categories
+      @serializer_options[:meta][:message] = 'Progetto creato con successo!'
+
+      render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
     else
       render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /projects/1
+  # PATCH/PUT /projects/:id
   def update
-    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
-      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
+    unless auth_user.admin? params[:id]
+      return render json: ErrorSerializer.new('Non puoi aggiornare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @categories = Category.find(params[:project][:categories])
@@ -51,31 +54,38 @@ class ProjectsController < ApplicationController
     if @project.update(project_params)
       @project.categories = @categories
 
-      render json: ProjectSerializer.new(@project).serialized_json
+      @serializer_options[:meta][:message] = 'Progetto aggiornato con successo!'
+
+      render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
     else
       render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
-  # DELETE /projects/1
+  # DELETE /projects/:id
   def destroy
-    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
-      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
+    unless auth_user.admin? params[:id]
+      return render json: ErrorSerializer.new('Non puoi eliminare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @project.destroy
+
+    @serializer_options[:meta][:message] = 'Progetto eliminato con successo!'
+
+    render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
 
-  # GET /category/category_id/projects
+  # GET /category/:category_id/projects
   def category_projects
     @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
+
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
-  # GET /user/user_id/projects?status=&admin=1\0
+  # GET /user/:user_id/projects?status=&admin=1\0
   def user_projects
     user_id = params[:user_id]
     admin = params[:admin]
@@ -87,7 +97,7 @@ class ProjectsController < ApplicationController
     when '0'
       @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
     else
-      @projects = User.find(user_id).all_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
+      @projects = User.find(user_id).projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
     end
 
     case status
@@ -97,6 +107,8 @@ class ProjectsController < ApplicationController
       @projects = @projects.closed
     when 'terminated'
       @projects = @projects.terminated
+    else
+      return render json: ErrorSerializer.new("Parametro status = #{status} non riconosciuto. Consentiti: 'open', 'closed', 'terminated'", status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @pagy, @projects = pagy(@projects)
