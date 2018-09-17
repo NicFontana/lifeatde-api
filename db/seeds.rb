@@ -62,14 +62,12 @@ statuses.each {|name| ProjectStatus.create({name: name})}
           password_digest: "#{BCrypt::Password.create('password')}",
           bio: Faker::Lorem.paragraph,
           birthday: Faker::Date.birthday(19, 30),
-          phone: Faker::PhoneNumber.cell_phone,
+          phone: 1234567890,
           profile_picture_path: '/path/to/pic.png',
           course_id: Faker::Number.between(1, 7)
       }
   )
-  3.times do
-    user.categories << categories.sample
-  end
+  user.categories << categories.sample(3)
   user.save!
 end
 

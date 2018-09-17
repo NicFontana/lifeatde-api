@@ -1,6 +1,6 @@
 class Project < ApplicationRecord
-	validates :title, presence: { message: 'Il progetto deve avere un titolo' }
-	validates :description, presence: { message: 'Il progetto deve avere una descrizione' }
+	validates :title, presence: {message: "Questo campo non può essere vuoto"}
+	validates :description, presence: {message: "Questo campo non può essere vuoto"}
 
 	statuses = {
 			open: 1,
@@ -25,7 +25,8 @@ class Project < ApplicationRecord
 
 	scope :matching, -> (querystring) {where('projects.title LIKE ? OR projects. description LIKE ?', "%#{querystring}%", "%#{querystring}%")}
 
-	def self.for_user(auth_user)
-		joins(:categories).where(categories_projects: {category_id: auth_user.categories.ids})
+	def self.for_user(user)
+		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
 	end
+
 end

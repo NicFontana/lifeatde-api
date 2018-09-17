@@ -22,8 +22,6 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
   create_table "categories_projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.bigint "project_id"
     t.bigint "category_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_categories_projects_on_category_id"
     t.index ["project_id", "category_id"], name: "index_categories_projects_on_project_id_and_category_id"
     t.index ["project_id"], name: "index_categories_projects_on_project_id"
@@ -32,10 +30,8 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
   create_table "categories_users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "category_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_categories_users_on_category_id"
-    t.index ["user_id", "category_id"], name: "index_categories_users_on_user_id_and_category_id"
+    t.index ["user_id", "category_id"], name: "index_categories_users_on_user_id_and_category_id", unique: true
     t.index ["user_id"], name: "index_categories_users_on_user_id"
   end
 
@@ -48,9 +44,7 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
   create_table "courses_news", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.bigint "course_id"
     t.bigint "news_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["course_id", "news_id"], name: "index_courses_news_on_course_id_and_news_id"
+    t.index ["course_id", "news_id"], name: "index_courses_news_on_course_id_and_news_id", unique: true
     t.index ["course_id"], name: "index_courses_news_on_course_id"
     t.index ["news_id"], name: "index_courses_news_on_news_id"
   end
@@ -95,6 +89,7 @@ ActiveRecord::Schema.define(version: 2018_09_06_092914) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_projects_users_on_project_id"
+    t.index ["user_id", "project_id"], name: "index_projects_users_on_user_id_and_project_id", unique: true
     t.index ["user_id"], name: "index_projects_users_on_user_id"
   end
 
