@@ -1,6 +1,6 @@
 class Project < ApplicationRecord
-	validates :title, presence: true
-	validates :description, presence: true
+	validates :title, presence: {message: "Questo campo non può essere vuoto"}
+	validates :description, presence: {message: "Questo campo non può essere vuoto"}
 
 	statuses = {
 			open: 1,
@@ -34,4 +34,5 @@ class Project < ApplicationRecord
 	def self.for_user(user)
 		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
 	end
+
 end
