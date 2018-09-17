@@ -6,7 +6,7 @@ class StudyGroupsController < ApplicationController
   def index
 	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user, :course).order(created_at: :desc))
 
-	  @serializer_options[:include] = [:user, :course]
+	  @serializer_options[:include] = [:user]
 	  @serializer_options.merge!(pagination_options(@pagy))
 
 	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
@@ -16,7 +16,7 @@ class StudyGroupsController < ApplicationController
   def show
     @study_group = StudyGroup.includes(:user, :course).find(params[:id])
 
-    @serializer_options[:include] = [:user, :course]
+    @serializer_options[:include] = [:user]
 
     render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
   end
@@ -26,10 +26,12 @@ class StudyGroupsController < ApplicationController
 	  @course = Course.find(params[:course_id])
     @study_group = StudyGroup.new(study_group_params)
     @study_group.user = auth_user
-    @study_group.course = course
+    @study_group.course = @course
 
     if @study_group.save
-	    @serializer_options[:include] = [:user, :course]
+	    @serializer_options[:include] = [:user]
+	    @serializer_options[:meta][:message] = 'Gruppo di studio creato con successo!'
+
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json, status: :created
     else
       render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
@@ -43,7 +45,9 @@ class StudyGroupsController < ApplicationController
 	  end
 
     if @study_group.update(study_group_params)
-	    @serializer_options[:include] = [:user, :course]
+	    @serializer_options[:include] = [:user]
+	    @serializer_options[:meta][:message] = 'Gruppo di studio aggiornato con successo!'
+
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
     else
       render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
@@ -61,7 +65,7 @@ class StudyGroupsController < ApplicationController
 	  @pagy, @study_groups = pagy(@user.study_groups.includes(:course))
 
 	  @serializer_options.merge!(pagination_options(@pagy))
-	  @serializer_options[:include] = [:user, :course]
+	  @serializer_options[:include] = [:user]
 	  @serializer_options[:meta][:message] = 'Gruppo di studio eliminato con successo!'
 
 	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
@@ -74,8 +78,9 @@ class StudyGroupsController < ApplicationController
 			@pagy, @study_groups = pagy(StudyGroup.includes(:user, :course).order(created_at: :desc))
 		end
 
-		@serializer_options[:include] = [:user, :course]
+		@serializer_options[:include] = [:user]
 		@serializer_options.merge!(pagination_options(@pagy))
+
 		render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
 	end
 
