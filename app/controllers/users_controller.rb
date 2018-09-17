@@ -14,7 +14,7 @@ class UsersController < ApplicationController
     end
 
     if @user.update(user_params)
-      @serializer_options[:meta][:message] = 'Utente aggiornato con successo!'
+      @serializer_options[:meta][:message] = 'Profilo aggiornato con successo!'
 
       render json: UserSerializer.new(@user, @serializer_options).serialized_json
     else
