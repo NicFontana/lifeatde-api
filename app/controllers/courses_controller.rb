@@ -5,7 +5,7 @@ class CoursesController < ApplicationController
   def index
     @courses = Course.all
 
-    render json: CourseSerializer.new(@course).serialized_json
+    render json: CourseSerializer.new(@courses).serialized_json
   end
 
   # GET /courses/:id
