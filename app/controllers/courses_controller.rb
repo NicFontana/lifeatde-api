@@ -1,5 +1,5 @@
 class CoursesController < ApplicationController
-  before_action :set_course, only: [:index, :show]
+  before_action :set_course, only: [:show]
 
   # GET /courses
   def index
