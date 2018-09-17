@@ -1,14 +1,14 @@
 class ProjectsController < ApplicationController
-	include Pagination
+	include Pagination, Rack::Utils
   before_action :set_project, only: [:update, :destroy]
 
   # GET /projects
   # GET /projects?search=query
   def index
     if params[:search].present?
-      @pagy, @projects = pagy(Project.by_querystring(params[:search]).includes(:admins, :project_status).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.matching(params[:search]).includes(:admins, :project_status, :categories).order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status, :categories).order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]
@@ -18,7 +18,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1
   def show
-    @project = Project.includes(:project_status, members: [:projects_users]).find(params[:id])
+    @project = Project.includes(:project_status, :categories, members: [:projects_users]).find(params[:id])
     @serializer_options[:include] = [:members]
     @serializer_options[:params] = { project_id: params[:id] }
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -26,33 +26,49 @@ class ProjectsController < ApplicationController
 
   # POST /projects
   def create
+    @categories = Category.find(params[:project][:categories])
+
     @project = Project.new(project_params)
+
     @project.projects_users.build(admin: true, user_id: auth_user.id)
 
     if @project.save
+      @project.categories << @categories
       render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /projects/1
   def update
+    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
+    @categories = Category.find(params[:project][:categories])
+
     if @project.update(project_params)
+      @project.categories = @categories
+
       render json: ProjectSerializer.new(@project).serialized_json
     else
-      render json: ErrorSerializer.new(@project.errors, Rack::Utils.status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@project.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # DELETE /projects/1
   def destroy
+    unless @project.admins.detect{ |admin| admin.id == auth_user.id}
+      return render json: ErrorSerializer.new("Solo un amministratore può aggiornare le informazioni del progetto", status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
     @project.destroy
   end
 
   # GET /category/category_id/projects
   def category_projects
-    @pagy, @projects= pagy(Project.by_category(params[:category_id]).includes(:admins, :project_status).order(created_at: :desc))
+    @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -67,11 +83,11 @@ class ProjectsController < ApplicationController
 
     case admin
     when '1'
-      @projects = User.find(user_id).created_projects.includes(:projects_users, :project_status).order(created_at: :desc)
+      @projects = User.find(user_id).created_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
     when '0'
-      @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status).order(created_at: :desc)
+      @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
     else
-      @projects = User.find(user_id).all_projects.includes(:projects_users, :project_status).order(created_at: :desc)
+      @projects = User.find(user_id).all_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
     end
 
     case status
