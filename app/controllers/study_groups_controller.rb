@@ -1,46 +1,88 @@
 class StudyGroupsController < ApplicationController
-	include Pagination
-  before_action :set_study_group, only: [:show, :update, :destroy]
+	include Pagination, Rack::Utils
+  before_action :set_study_group, only: [:update, :destroy]
 
-  # GET /study_groups
+	# GET /course/:course_id/study_groups
   def index
-    @pagy, @study_groups = pagy(StudyGroup.includes(:user).order(created_at: :desc))
+	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user, :course).order(created_at: :desc))
 
-    @serializer_options[:include] = [:user]
-    @serializer_options.merge!(pagination_options(@pagy))
+	  @serializer_options[:include] = [:user]
+	  @serializer_options.merge!(pagination_options(@pagy))
 
-    render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
 
   # GET /study_groups/1
   def show
-    render json: @study_group
+    @study_group = StudyGroup.includes(:user, :course).find(params[:id])
+
+    @serializer_options[:include] = [:user]
+
+    render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
   end
 
-  # POST /study_groups
+  # POST /course/:course_id/study_groups
   def create
+	  @course = Course.find(params[:course_id])
     @study_group = StudyGroup.new(study_group_params)
+    @study_group.user = auth_user
+    @study_group.course = @course
 
     if @study_group.save
-      render json: @study_group, status: :created, location: @study_group
+	    @serializer_options[:include] = [:user]
+	    @serializer_options[:meta][:message] = 'Gruppo di studio creato con successo!'
+
+      render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json, status: :created
     else
-      render json: @study_group.errors, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /study_groups/1
   def update
+	  unless @study_group.user.id == auth_user.id
+		  return render json: ErrorSerializer.new('Non puoi aggiornare informazioni su un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
+	  end
+
     if @study_group.update(study_group_params)
-      render json: @study_group
+	    @serializer_options[:include] = [:user]
+	    @serializer_options[:meta][:message] = 'Gruppo di studio aggiornato con successo!'
+
+      render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
     else
-      render json: @study_group.errors, status: :unprocessable_entity
+      render json: ErrorSerializer.new(@study_group.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
   end
 
   # DELETE /study_groups/1
   def destroy
-    @study_group.destroy
+	  @user = auth_user
+	  unless @study_group.user.id == @user.id
+		  return render json: ErrorSerializer.new('Non puoi eliminare un gruppo di studio non tuo', status_code(:forbidden)).serialized_json, status: :forbidden
+	  end
+
+	  @study_group.destroy
+	  @pagy, @study_groups = pagy(@user.study_groups.includes(:course))
+
+	  @serializer_options.merge!(pagination_options(@pagy))
+	  @serializer_options[:include] = [:user]
+	  @serializer_options[:meta][:message] = 'Gruppo di studio eliminato con successo!'
+
+	  render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
   end
+
+	def search
+		if params[:search].present?
+			@pagy, @study_groups = pagy(StudyGroup.matching(params[:search]).includes(:user, :course).order(created_at: :desc))
+		else
+			@pagy, @study_groups = pagy(StudyGroup.includes(:user, :course).order(created_at: :desc))
+		end
+
+		@serializer_options[:include] = [:user]
+		@serializer_options.merge!(pagination_options(@pagy))
+
+		render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	end
 
   private
     # Use callbacks to share common setup or constraints between actions.
@@ -50,6 +92,6 @@ class StudyGroupsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def study_group_params
-      params.require(:study_group).permit(:title, :description, :user_id, :course_id)
+      params.require(:study_group).permit(:title, :description, :course_id)
     end
 end
