@@ -6,7 +6,7 @@ class CreateProjectsUsers < ActiveRecord::Migration[5.2]
       t.boolean :admin
 
       t.timestamps
-      t.index [:user_id, :project_id]
+      t.index [:user_id, :project_id], unique: true
     end
   end
 end

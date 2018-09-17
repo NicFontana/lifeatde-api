@@ -13,4 +13,9 @@ class User < ApplicationRecord
 	has_many :created_projects, -> { where(projects_users: {admin: true}) }, :through => :projects_users, :source => :project, inverse_of: :admins
 
 	has_and_belongs_to_many :categories
+
+	def admin?(project_id)
+		record = projects_users.detect{ |el| el.project_id == project_id.to_i }
+		record.nil? ? false : record.admin
+	end
 end
