@@ -15,7 +15,10 @@ class JsonWebToken
 
 	# Validates the payload hash for expiration and meta claims
 	def self.valid_payload?(payload)
-		!expired?(payload) && payload['aud'] == meta[:aud] && payload['user_id'].is_a?(Integer) && payload.length == 3
+		!expired?(payload) &&
+				payload['aud'] == meta[:aud] &&
+				payload['user_id'].is_a?(Integer) &&
+				payload.length == 3
 	end
 
 	# Default options to be encoded in the token
