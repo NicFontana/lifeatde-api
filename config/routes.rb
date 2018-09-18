@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       get 'members', :to => 'users#members_index'
       post 'members', :to => 'users#members_create'
       delete 'members', :to => 'users#members_destroy'
+      get 'members/find', :to => 'users#find_members_for_project'
     end
     resources :categories, only: [:index, :show] do
       get 'projects', :to => 'projects#category_projects'
@@ -19,6 +20,7 @@ Rails.application.routes.draw do
       get 'projects', :to => 'projects#user_projects'
     end
     post 'login', :to => 'authentication#login'
+    get 'user/me', :to => 'users#auth_user_informations'
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

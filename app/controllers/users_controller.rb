@@ -22,6 +22,13 @@ class UsersController < ApplicationController
     end
   end
 
+  #GET /user/me
+  def auth_user_informations
+    user = User.includes(:course, :categories).find(auth_user.id)
+
+    render json: UserSerializer.new(user).serialized_json
+  end
+
   # POST /projects/:project_id/members
   def members_create
     @project = Project.includes(:admins).find(params[:project_id])
@@ -68,6 +75,18 @@ class UsersController < ApplicationController
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
+  end
+
+  # GET /projects/:id/member/find
+  def find_members_for_project
+    members = Project.find(params[:project_id]).members
+    #if members.empty?
+      #@pagy, users = pagy(User.all)
+    #else
+      @pagy, users = pagy(User.where.not(id: members.ids))
+    #end
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: UserSerializer.new(users, @serializer_options).serialized_json
   end
 
   private
