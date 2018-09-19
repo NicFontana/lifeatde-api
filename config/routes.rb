@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 			get 'news', :to => 'news#course_news'
 		end
 		get 'study_groups', :to => 'study_groups#search'
+    get 'users', :to => 'users#search_users'
     get 'users/me', :to => 'users#auth_user_informations'
 		resources :users do
       get 'projects', :to => 'projects#user_projects'

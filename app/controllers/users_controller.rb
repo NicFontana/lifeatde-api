@@ -79,14 +79,29 @@ class UsersController < ApplicationController
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
   end
 
-  # GET /projects/:id/member/find
-  def find_members_for_project
-    members = Project.find(params[:project_id]).members
-    #if members.empty?
-      #@pagy, users = pagy(User.all)
-    #else
-      @pagy, users = pagy(User.where.not(id: members.ids))
-    #end
+  # GET /users?serch=querystring&not_in_project=:id
+  def search_users
+    querystring = params[:search]
+
+    if querystring.present?
+      if params[:not_in_project].present?
+        members = Project.find(params[:not_in_project]).members
+        @pagy, users = pagy(User.where.not(id: members.ids).matching(querystring))
+      else
+        @pagy, users = pagy(User.matching(querystring))
+      end
+    else
+      if params[:not_in_project].present?
+        members = Project.find(params[:not_in_project]).members
+        @pagy, users = pagy(User.where.not(id: members.ids))
+      else
+        # qui ho messo un index per ora ma bisogna vedere cosa restituire
+        # se una chima questa route senza nessun parametro, io ci piazzerei un errore
+        @pagy, users = pagy(User.all)
+      end
+    end
+
+    @serializer_options.merge!(pagination_options(@pagy))
     render json: UserSerializer.new(users, @serializer_options).serialized_json
   end
 
