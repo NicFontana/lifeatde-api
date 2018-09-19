@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   include Pagination
-  before_action :set_user, only: [:show, :update, :avatar]
+  before_action :set_user, only: [:show, :update, :avatar_destroy]
 
   # GET /users/:id
   def show

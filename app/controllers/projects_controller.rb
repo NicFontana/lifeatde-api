@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
 	include Pagination
-  before_action :set_project, only: [:update, :destroy, :documents]
+  before_action :set_project, only: [:update, :destroy, :documents_destroy]
 
   # GET /projects
   # GET /projects?search=query
@@ -53,7 +53,7 @@ class ProjectsController < ApplicationController
       return render json: ErrorSerializer.new('Non puoi aggiornare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    if params[:project][:categories].present? &&  params[:project][:categories].all?(&:blank?)
+    if params[:project][:categories].present? && params[:project][:categories].all?(&:blank?)
       return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
