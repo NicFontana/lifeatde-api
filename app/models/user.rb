@@ -15,6 +15,20 @@ class User < ApplicationRecord
 
 	has_and_belongs_to_many :categories
 
+	def self.matching(querystring)
+		querystrings = querystring.split
+		first = querystrings.first
+		querystrings.drop(1)
+
+		query = where('firstname LIKE ? OR lastname LIKE ?', "%#{first}%", "%#{first}%")
+
+		querystrings.each do |querystring|
+			query = where('firstname LIKE ? OR lastname LIKE ?', "%#{querystring}%", "%#{querystring}%").or(query)
+		end
+
+		query
+	end
+
 	def admin?(project_id)
 		record = projects_users.detect{ |el| el.project_id == project_id.to_i }
 		record.nil? ? false : record.admin

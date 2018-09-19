@@ -15,7 +15,11 @@ Rails.application.routes.draw do
 			get 'news', :to => 'news#course_news'
 		end
 		get 'study_groups', :to => 'study_groups#search'
+    get 'users', :to => 'users#search_users'
 		resources :users do
+      collection do
+        get :me
+      end
       delete 'avatar', :to => 'user#avatar_destroy'
       get 'projects', :to => 'projects#user_projects'
     end
