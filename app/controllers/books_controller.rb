@@ -23,10 +23,9 @@ class BooksController < ApplicationController
 
   # POST /course/:course_id/books
   def create
-	  @course = Course.find(params[:course_id])
 	  @book = Book.new(book_params)
 	  @book.user = auth_user
-	  @book.course = @course
+	  @book.course = Course.find(params[:course_id])
 
 	  if @book.save
 		  @serializer_options[:include] = [:user]
