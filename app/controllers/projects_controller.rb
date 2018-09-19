@@ -29,7 +29,7 @@ class ProjectsController < ApplicationController
 
   # POST /projects
   def create
-    unless params[:project][:categories].any?
+    unless params[:project][:categories].present? && params[:project][:categories].any?
       return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
@@ -53,7 +53,7 @@ class ProjectsController < ApplicationController
       return render json: ErrorSerializer.new('Non puoi aggiornare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    unless !params[:project][:categories].all?(&:blank?)
+    if params[:project][:categories].present? &&  params[:project][:categories].all?(&:blank?)
       return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
@@ -127,13 +127,12 @@ class ProjectsController < ApplicationController
   end
 
   # DELETE /project/:id/documents
-  def documents
+  def documents_destroy
     @documents = ActiveStorage::Attachment.find(params[:documents])
     messages = []
 
     @documents.each do |document|
       document.purge
-
       messages.push("'#{document.blob.filename}' eliminato con successo!")
     end
 

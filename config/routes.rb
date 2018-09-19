@@ -1,12 +1,10 @@
 Rails.application.routes.draw do
   scope :api do
     resources :projects do
+      delete 'documents', :to => 'projects#documents_destroy'
       get 'members', :to => 'users#members_index'
       post 'members', :to => 'users#members_create'
       delete 'members', :to => 'users#members_destroy'
-      member do
-        delete :documents
-      end
     end
     resources :categories, only: [:index, :show] do
       get 'projects', :to => 'projects#category_projects'
@@ -18,12 +16,9 @@ Rails.application.routes.draw do
 		end
 		get 'study_groups', :to => 'study_groups#search'
 		resources :users do
+      delete 'avatar', :to => 'user#avatar_destroy'
       get 'projects', :to => 'projects#user_projects'
-      member do
-        delete :avatar
-      end
     end
     post 'login', :to => 'authentication#login'
   end
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

@@ -71,11 +71,11 @@ class UsersController < ApplicationController
   end
 
   # DELETE /users/:id/avatar
-  def avatar
+  def avatar_destroy
     @avatar = ActiveStorage::Attachment.find(params[:avatar])
     @avatar.purge
 
-    @serializer_options[:meta][:message] = 'Immagine di profilo rimossa con successo!'
+    @serializer_options[:meta][:message] = 'Immagine del profilo rimossa con successo!'
 
     render json: UserSerializer.new(@user, @serializer_options).serialized_json
   end

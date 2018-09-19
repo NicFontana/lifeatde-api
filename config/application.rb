@@ -37,8 +37,5 @@ module LifeAtDE
     # Configure paths to be escluded from authentication
     auth_excluded_path = %w(/api/login)
     config.middleware.use JWTAuth, auth_excluded_path
-
-    # Configure the default url options useful for cms operations
-    Rails.application.routes.default_url_options[:host] = 'localhost:3000'
   end
 end

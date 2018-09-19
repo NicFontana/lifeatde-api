@@ -11,7 +11,7 @@ class UserSerializer
     else
       {
         id: nil,
-        url: "http://#{Rails.application.routes.default_url_options[:host]}/images/avatar.png"
+        url: "#{Rails.application.routes.default_url_options[:host]}/images/avatar.png"
       }
     end
   end
