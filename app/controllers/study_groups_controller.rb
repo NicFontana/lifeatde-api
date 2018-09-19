@@ -29,7 +29,7 @@ class StudyGroupsController < ApplicationController
 
     if @study_group.save
 	    @serializer_options[:include] = [:user]
-	    @serializer_options[:meta][:message] = 'Gruppo di studio creato con successo!'
+	    @serializer_options[:meta][:messages] = ['Gruppo di studio creato con successo!']
 
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json, status: :created
     else
@@ -44,7 +44,7 @@ class StudyGroupsController < ApplicationController
 	  end
 
     if @study_group.update(study_group_params)
-	    @serializer_options[:meta][:message] = 'Gruppo di studio aggiornato con successo!'
+	    @serializer_options[:meta][:messages] = ['Gruppo di studio aggiornato con successo!']
 
       render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
     else
@@ -61,7 +61,7 @@ class StudyGroupsController < ApplicationController
 
 	  @study_group.destroy
 
-	  @serializer_options[:meta][:message] = 'Gruppo di studio eliminato con successo!'
+	  @serializer_options[:meta][:messages] = ['Gruppo di studio eliminato con successo!']
 
 	  render json: StudyGroupSerializer.new(@study_group, @serializer_options).serialized_json
   end

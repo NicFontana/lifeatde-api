@@ -14,7 +14,7 @@ class UsersController < ApplicationController
     end
 
     if @user.update(user_params)
-      @serializer_options[:meta][:message] = 'Profilo aggiornato con successo!'
+      @serializer_options[:meta][:messages] = ['Profilo aggiornato con successo!']
 
       render json: UserSerializer.new(@user, @serializer_options).serialized_json
     else
@@ -43,7 +43,7 @@ class UsersController < ApplicationController
 
     if @project.collaborators << @collaborators
       @serializer_options[:params] = {project_id: params[:project_id]}
-      @serializer_options[:meta][:message] = 'Membri aggiunti con successo!'
+      @serializer_options[:meta][:messages] = ['Membri aggiunti con successo!']
 
       render json: UserSerializer.new(@collaborators, @serializer_options).serialized_json
     else
@@ -64,7 +64,7 @@ class UsersController < ApplicationController
     @project.collaborators.delete(@collaborators)
 
     @serializer_options[:params] = {project_id: params[:project_id]}
-    @serializer_options[:meta][:message] = 'Membri eliminati con successo!'
+    @serializer_options[:meta][:messages] = ['Membri eliminati con successo!']
 
     render json: UserSerializer.new(@collaborators, @serializer_options).serialized_json
   end
@@ -84,7 +84,7 @@ class UsersController < ApplicationController
     @avatar = ActiveStorage::Attachment.find(params[:avatar])
     @avatar.purge
 
-    @serializer_options[:meta][:message] = 'Immagine del profilo rimossa con successo!'
+    @serializer_options[:meta][:messages] = ['Immagine del profilo rimossa con successo!']
 
     render json: UserSerializer.new(@user, @serializer_options).serialized_json
   end

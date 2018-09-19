@@ -39,7 +39,7 @@ class ProjectsController < ApplicationController
     @project.projects_users.build(admin: true, user_id: auth_user.id)
 
     if @project.save && @project.categories << @categories
-      @serializer_options[:meta][:message] = 'Progetto creato con successo!'
+      @serializer_options[:meta][:messages] = ['Progetto creato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
     else
@@ -62,7 +62,7 @@ class ProjectsController < ApplicationController
     if @project.update(project_params)
       @project.categories = @categories
 
-      @serializer_options[:meta][:message] = 'Progetto aggiornato con successo!'
+      @serializer_options[:meta][:messages] = ['Progetto aggiornato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
     else
@@ -78,7 +78,7 @@ class ProjectsController < ApplicationController
 
     @project.destroy
 
-    @serializer_options[:meta][:message] = 'Progetto eliminato con successo!'
+    @serializer_options[:meta][:messages] = ['Progetto eliminato con successo!']
 
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
@@ -136,7 +136,7 @@ class ProjectsController < ApplicationController
       messages.push("'#{document.blob.filename}' eliminato con successo!")
     end
 
-    @serializer_options[:meta][:message] = messages
+    @serializer_options[:meta][:messages] = messages
 
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
