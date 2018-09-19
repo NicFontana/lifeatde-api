@@ -4,7 +4,8 @@ class NewsController < ApplicationController
 
   #GET /courses/:course_id/news
   def course_news
-    @pagy, @news = pagy(News.course_news(params[:course_id]).order(created_at: :desc))
+    course = Course.find(params[:course_id])
+    @pagy, @news = pagy(course.news.order(created_at: :desc))
 
     render json: NewsSerializer.new(@news, pagination_options(@pagy)).serialized_json
   end

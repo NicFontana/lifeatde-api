@@ -8,7 +8,6 @@ class CreateUsers < ActiveRecord::Migration[5.2]
       t.text :bio
       t.date :birthday
       t.string :phone
-      t.string :profile_picture_path
       t.references :course, foreign_key: {on_delete: :nullify, on_update: :cascade}
       t.index :email, unique: true
 

@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   include Pagination
-  before_action :set_user, only: [:show, :update]
+  before_action :set_user, only: [:show, :update, :avatar_destroy]
 
   # GET /users/:id
   def show
@@ -20,6 +20,15 @@ class UsersController < ApplicationController
     else
 			render json: ErrorSerializer.new(@user.errors, status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
+  end
+
+  #GET /users/me
+  def me
+    user = User.includes(:course, :categories).find_by(id: request.env['jwt.payload']['user_id'])
+
+    @serializer_options[:include] = [:course, :categories]
+
+    render json: UserSerializer.new(user, @serializer_options).serialized_json
   end
 
   # POST /projects/:project_id/members
@@ -70,6 +79,35 @@ class UsersController < ApplicationController
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
   end
 
+  # DELETE /users/:id/avatar
+  def avatar_destroy
+    @avatar = ActiveStorage::Attachment.find(params[:avatar])
+    @avatar.purge
+
+    @serializer_options[:meta][:message] = 'Immagine del profilo rimossa con successo!'
+
+    render json: UserSerializer.new(@user, @serializer_options).serialized_json
+  end
+  
+  # GET /users?not_in_project=:id&search=querystring
+  def search_users
+    querystring = params[:search]
+
+    if querystring.present?
+      if params[:not_in_project].present?
+        members = Project.find(params[:not_in_project]).members
+        @pagy, users = pagy(User.where.not(id: members.ids).matching(querystring))
+      else
+        @pagy, users = pagy(User.matching(querystring))
+      end
+    else
+      return render json: ErrorSerializer.new('Inserire una striga di ricerca per l\'utente', status_code(:bad_request)).serialized_json, status: :bad_request
+    end
+
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: UserSerializer.new(users, @serializer_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
@@ -78,6 +116,6 @@ class UsersController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-	    params.require(:user).permit(:bio, :phone, :profile_picture_path)
+	    params.require(:user).permit(:bio, :phone, :avatar)
     end
 end

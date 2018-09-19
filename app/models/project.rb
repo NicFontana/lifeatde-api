@@ -17,13 +17,13 @@ class Project < ApplicationRecord
 
 	has_and_belongs_to_many :categories
 
-	has_many :documents
+	has_many_attached :documents
 
 	scope :open, -> { where(project_status_id: statuses[:open]) }
 	scope :closed, -> { where(project_status_id: statuses[:closed]) }
 	scope :terminated, -> { where(project_status_id: statuses[:terminated]) }
 
-	scope :matching, -> (querystring) {where('projects.title LIKE ? OR projects. description LIKE ?', "%#{querystring}%", "%#{querystring}%")}
+	scope :matching, -> (querystring) {where('title LIKE ? OR description LIKE ?', "%#{querystring}%", "%#{querystring}%")}
 
 	def self.for_user(user)
 		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
