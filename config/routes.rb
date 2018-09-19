@@ -9,12 +9,14 @@ Rails.application.routes.draw do
         get :me
       end
       get 'projects', :to => 'projects#user_projects'
+      get 'study_groups', :to => 'study_groups#user_study_groups'
+      get 'books', :to => 'books#user_books'
       delete 'avatar', :to => 'user#avatar_destroy'
     end
 
     resources :projects do
       get 'members', :to => 'users#members_index'
-      post 'members', :to => 'users#members_create'
+      post 'members', :to => 'users#members_add'
       delete 'members', :to => 'users#members_destroy'
       delete 'documents', :to => 'projects#documents_destroy'
     end
@@ -26,8 +28,7 @@ Rails.application.routes.draw do
 		resources :courses, only: [:index, :show] do
 			resources :study_groups, shallow: true
 			resources :books, shallow: true
-			resources :news, only: [:show]
-			get 'news', :to => 'news#course_news'
+			resources :news, only: [:show, :index]
     end
 
 		get 'study_groups', :to => 'study_groups#search'

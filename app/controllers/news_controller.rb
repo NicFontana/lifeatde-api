@@ -3,7 +3,7 @@ class NewsController < ApplicationController
   before_action :set_news, only: [:show]
 
   #GET /courses/:course_id/news
-  def course_news
+  def index
     course = Course.find(params[:course_id])
     @pagy, @news = pagy(course.news.order(created_at: :desc))
 

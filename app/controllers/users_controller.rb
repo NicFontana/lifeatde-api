@@ -32,7 +32,7 @@ class UsersController < ApplicationController
   end
 
   # POST /projects/:project_id/members
-  def members_create
+  def members_add
     @project = Project.includes(:admins).find(params[:project_id])
     @collaborators = User.includes(:projects_users).find(params[:users][:ids])
     @current_user = auth_user
