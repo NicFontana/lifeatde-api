@@ -4,7 +4,7 @@ class StudyGroupsController < ApplicationController
 
 	# GET /course/:course_id/study_groups
   def index
-	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user, :course).order(created_at: :desc))
+	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user).order(created_at: :desc))
 
 	  @serializer_options[:include] = [:user]
 	  @serializer_options.merge!(pagination_options(@pagy))
