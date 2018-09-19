@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
   include Pagination
-  before_action :set_book, only: [:update, :destroy]
+  before_action :set_book, only: [:update, :destroy, :photos_destroy]
 
   # GET /course/:course_id/books
   def index
@@ -77,7 +77,21 @@ class BooksController < ApplicationController
 	  @serializer_options.merge!(pagination_options(@pagy))
 
 	  render json: BookSerializer.new(@books, @serializer_options).serialized_json
-  end
+	end
+
+	def photos_destroy
+		@photos = ActiveStorage::Attachment.find(params[:photos])
+		messages = []
+
+		@photos.each do |photo|
+			photo.purge
+			messages.push("'#{photo.blob.filename}' eliminato con successo!")
+		end
+
+		@serializer_options[:meta][:message] = messages
+
+		render json: BookSerializer.new(@book, @serializer_options).serialized_json
+	end
 
   private
     # Use callbacks to share common setup or constraints between actions.
@@ -87,6 +101,6 @@ class BooksController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def book_params
-      params.require(:book).permit(:title, :description, :price, :course_id)
+      params.require(:book).permit(:title, :description, :price, :course_id, photos: [])
     end
 end

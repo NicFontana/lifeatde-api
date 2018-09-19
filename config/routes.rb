@@ -17,6 +17,7 @@ Rails.application.routes.draw do
 		end
 		get 'study_groups', :to => 'study_groups#search'
     get 'books', :to => 'books#search'
+    delete 'books/:id/photos', :to => 'books#photos_destroy'
     get 'users', :to => 'users#search_users'
 		resources :users do
       collection do
