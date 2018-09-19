@@ -7,6 +7,7 @@ class User < ApplicationRecord
   belongs_to :course
 
   has_many :study_groups
+	has_many :books
 
 	has_many :projects_users
 	has_many :projects, :through => :projects_users, :source => :project, inverse_of: :members

@@ -79,6 +79,16 @@ class StudyGroupsController < ApplicationController
 		render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
 	end
 
+	# GET /users/:user_id/study_groups
+	def user_study_groups
+		@pagy, @study_groups = pagy(User.find(params[:id]).study_groups.includes(:course).order(created_at: :desc))
+
+		@serializer_options[:include] = [:user]
+		@serializer_options.merge!(pagination_options(@pagy))
+
+		render json: StudyGroupSerializer.new(@study_groups, @serializer_options).serialized_json
+	end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_study_group

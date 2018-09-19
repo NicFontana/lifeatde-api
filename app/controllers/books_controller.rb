@@ -93,6 +93,16 @@ class BooksController < ApplicationController
 		render json: BookSerializer.new(@book, @serializer_options).serialized_json
 	end
 
+  # GET /users/:user_id/books
+  def user_books
+	  @pagy, @books = pagy(User.find(params[:id]).books.includes(:course).order(created_at: :desc))
+
+	  @serializer_options[:include] = [:user]
+	  @serializer_options.merge!(pagination_options(@pagy))
+
+	  render json: BookSerializer.new(@projects, @serializer_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_book
