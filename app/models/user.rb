@@ -22,7 +22,7 @@ class User < ApplicationRecord
 		query = where('firstname LIKE ? OR lastname LIKE ?', "%#{first}%", "%#{first}%")
 
 		querystrings.each do |querystring|
-			query = where('users.firstname LIKE ? OR users.lastname LIKE ?', "%#{querystring}%", "%#{querystring}%").or(query)
+			query = where('firstname LIKE ? OR lastname LIKE ?', "%#{querystring}%", "%#{querystring}%").or(query)
 		end
 
 		query
