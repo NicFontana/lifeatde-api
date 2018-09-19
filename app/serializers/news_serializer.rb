@@ -1,4 +1,4 @@
 class NewsSerializer
   include FastJsonapi::ObjectSerializer
-  attributes :title, :description
+  attributes :title, :description, :created_at
 end
