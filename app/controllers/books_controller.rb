@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
   include Pagination
-  before_action :set_book, only: [:show, :update, :destroy]
+  before_action :set_book, only: [:update, :destroy]
 
   # GET /course/:course_id/books
   def index
