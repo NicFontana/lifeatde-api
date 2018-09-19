@@ -22,6 +22,15 @@ class UsersController < ApplicationController
     end
   end
 
+  #GET /users/me
+  def me
+    user = User.includes(:course, :categories).find_by(id: request.env['jwt.payload']['user_id'])
+
+    @serializer_options[:include] = [:course, :categories]
+
+    render json: UserSerializer.new(user, @serializer_options).serialized_json
+  end
+
   # POST /projects/:project_id/members
   def members_create
     @project = Project.includes(:admins).find(params[:project_id])
@@ -68,6 +77,25 @@ class UsersController < ApplicationController
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
+  end
+
+  # GET /users?not_in_project=:id&search=querystring
+  def search_users
+    querystring = params[:search]
+
+    if querystring.present?
+      if params[:not_in_project].present?
+        members = Project.find(params[:not_in_project]).members
+        @pagy, users = pagy(User.where.not(id: members.ids).matching(querystring))
+      else
+        @pagy, users = pagy(User.matching(querystring))
+      end
+    else
+      return render json: ErrorSerializer.new('Inserire una striga di ricerca per l\'utente', status_code(:bad_request)).serialized_json, status: :bad_request
+    end
+
+    @serializer_options.merge!(pagination_options(@pagy))
+    render json: UserSerializer.new(users, @serializer_options).serialized_json
   end
 
   private
