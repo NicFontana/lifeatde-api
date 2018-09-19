@@ -3,7 +3,17 @@ class UserSerializer
 
   attributes :firstname, :lastname, :email, :bio, :birthday, :phone
   attribute :avatar do |object|
-    Rails.application.routes.url_helpers.rails_blob_path(object.avatar, only_path: true)
+    if object.avatar.attached?
+      {
+        id: object.avatar.id,
+        url: Rails.application.routes.url_helpers.rails_blob_url(object.avatar)
+      }
+    else
+      {
+        id: nil,
+        url: "http://#{Rails.application.routes.default_url_options[:host]}/images/avatar.png"
+      }
+    end
   end
 
   belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }

@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   include Pagination
-  before_action :set_user, only: [:show, :update]
+  before_action :set_user, only: [:show, :update, :avatar]
 
   # GET /users/:id
   def show
@@ -9,7 +9,6 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/:id
   def update
-    puts rails_blob_path(@user.avatar, disposition: "attachment")
     unless @user.id == auth_user.id
       return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
     end
@@ -69,6 +68,16 @@ class UsersController < ApplicationController
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
+  end
+
+  # DELETE /users/:id/avatar
+  def avatar
+    @avatar = ActiveStorage::Attachment.find(params[:avatar])
+    @avatar.purge
+
+    @serializer_options[:meta][:message] = 'Immagine di profilo rimossa con successo!'
+
+    render json: UserSerializer.new(@user, @serializer_options).serialized_json
   end
 
   private

@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
 	include Pagination
-  before_action :set_project, only: [:update, :destroy]
+  before_action :set_project, only: [:update, :destroy, :documents]
 
   # GET /projects
   # GET /projects?search=query
@@ -29,6 +29,10 @@ class ProjectsController < ApplicationController
 
   # POST /projects
   def create
+    unless params[:project][:categories].any?
+      return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+    end
+
     @categories = Category.find(params[:project][:categories])
     @project = Project.new(project_params)
 
@@ -47,6 +51,10 @@ class ProjectsController < ApplicationController
   def update
     unless auth_user.admin? params[:id]
       return render json: ErrorSerializer.new('Non puoi aggiornare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
+    unless !params[:project][:categories].all?(&:blank?)
+      return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
     @categories = Category.find(params[:project][:categories])
@@ -85,7 +93,7 @@ class ProjectsController < ApplicationController
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
-  # GET /user/:user_id/projects?status=&admin=1\0
+  # GET /users/:user_id/projects?status=&admin=1\0
   def user_projects
     user_id = params[:user_id]
     admin = params[:admin]
@@ -118,6 +126,22 @@ class ProjectsController < ApplicationController
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
+  # DELETE /project/:id/documents
+  def documents
+    @documents = ActiveStorage::Attachment.find(params[:documents])
+    messages = []
+
+    @documents.each do |document|
+      document.purge
+
+      messages.push("'#{document.blob.filename}' eliminato con successo!")
+    end
+
+    @serializer_options[:meta][:message] = messages
+
+    render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
@@ -126,6 +150,6 @@ class ProjectsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def project_params
-      params.require(:project).permit(:title, :description, :results, :project_status_id)
+      params.require(:project).permit(:title, :description, :results, :project_status_id, documents: [])
     end
 end

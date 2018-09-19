@@ -17,7 +17,7 @@ class Project < ApplicationRecord
 
 	has_and_belongs_to_many :categories
 
-	has_many :documents
+	has_many_attached :documents
 
 	scope :open, -> { where(project_status_id: statuses[:open]) }
 	scope :closed, -> { where(project_status_id: statuses[:closed]) }

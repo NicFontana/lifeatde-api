@@ -1,10 +1,12 @@
 Rails.application.routes.draw do
   scope :api do
-    resources :documents
     resources :projects do
       get 'members', :to => 'users#members_index'
       post 'members', :to => 'users#members_create'
       delete 'members', :to => 'users#members_destroy'
+      member do
+        delete :documents
+      end
     end
     resources :categories, only: [:index, :show] do
       get 'projects', :to => 'projects#category_projects'
@@ -17,6 +19,9 @@ Rails.application.routes.draw do
 		get 'study_groups', :to => 'study_groups#search'
 		resources :users do
       get 'projects', :to => 'projects#user_projects'
+      member do
+        delete :avatar
+      end
     end
     post 'login', :to => 'authentication#login'
   end
