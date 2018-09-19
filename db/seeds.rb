@@ -113,3 +113,15 @@ end
       }
   )
 end
+
+15.times do |i|
+  Book.create(
+      {
+          title: Faker::Book.title,
+          description: Faker::StarWars.unique.quote,
+          price: Faker::Number.decimal(2, 2),
+          course_id: Faker::Number.between(1, 7),
+          user_id: Faker::Number.between(1, 20)
+      }
+  )
+end

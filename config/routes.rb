@@ -11,10 +11,12 @@ Rails.application.routes.draw do
     end
 		resources :courses, only: [:index, :show] do
 			resources :study_groups, shallow: true
+			resources :books, shallow: true
 			resources :news, only: [:show]
 			get 'news', :to => 'news#course_news'
 		end
 		get 'study_groups', :to => 'study_groups#search'
+    get 'books', :to => 'books#search'
     get 'users', :to => 'users#search_users'
 		resources :users do
       collection do

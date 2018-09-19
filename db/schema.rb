@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_07_110404) do
+ActiveRecord::Schema.define(version: 2018_09_19_101312) do
+
+  create_table "books", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "title"
+    t.string "description"
+    t.decimal "price", precision: 8, scale: 2
+    t.bigint "user_id"
+    t.bigint "course_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_books_on_course_id"
+    t.index ["user_id"], name: "index_books_on_user_id"
+  end
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", null: false
@@ -129,6 +141,8 @@ ActiveRecord::Schema.define(version: 2018_09_07_110404) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "books", "courses", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "books", "users", on_update: :cascade, on_delete: :cascade
   add_foreign_key "categories_projects", "categories", on_update: :cascade, on_delete: :cascade
   add_foreign_key "categories_projects", "projects", on_update: :cascade, on_delete: :cascade
   add_foreign_key "categories_users", "categories", on_update: :cascade, on_delete: :cascade
