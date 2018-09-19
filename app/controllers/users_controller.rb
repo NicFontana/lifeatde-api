@@ -90,7 +90,7 @@ class UsersController < ApplicationController
   end
   
   # GET /users?not_in_project=:id&search=querystring
-  def search_users
+  def search
     querystring = params[:search]
 
     if querystring.present?
