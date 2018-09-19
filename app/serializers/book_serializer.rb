@@ -1,6 +1,6 @@
 class BookSerializer
   include FastJsonapi::ObjectSerializer
-  attributes :title, :description, :price
+  attributes :title, :description, :price, :created_at
 
   belongs_to :user, if: Proc.new { |record, params| record.association(:user).loaded? }
 

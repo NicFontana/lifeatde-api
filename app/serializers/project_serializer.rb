@@ -1,6 +1,6 @@
 class ProjectSerializer
   include FastJsonapi::ObjectSerializer
-  attributes :title, :description, :results
+  attributes :title, :description, :results, :created_at
 
   has_many :admins, serializer: :user, record_type: :user, if: Proc.new { |record, params| record.association(:admins).loaded? }
   has_many :collaborators, serializer: :user, record_type: :user, if: Proc.new { |record, params| record.association(:collaborators).loaded? }
