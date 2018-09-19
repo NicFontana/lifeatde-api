@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   include Pagination
-  before_action :set_user, only: [:show, :update]
+  before_action :set_user, only: [:show, :update, :avatar_destroy]
 
   # GET /users/:id
   def show
@@ -79,6 +79,16 @@ class UsersController < ApplicationController
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
   end
 
+  # DELETE /users/:id/avatar
+  def avatar_destroy
+    @avatar = ActiveStorage::Attachment.find(params[:avatar])
+    @avatar.purge
+
+    @serializer_options[:meta][:message] = 'Immagine del profilo rimossa con successo!'
+
+    render json: UserSerializer.new(@user, @serializer_options).serialized_json
+  end
+  
   # GET /users?not_in_project=:id&search=querystring
   def search_users
     querystring = params[:search]
@@ -106,6 +116,6 @@ class UsersController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-	    params.require(:user).permit(:bio, :phone, :profile_picture_path)
+	    params.require(:user).permit(:bio, :phone, :avatar)
     end
 end

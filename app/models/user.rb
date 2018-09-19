@@ -1,7 +1,8 @@
 class User < ApplicationRecord
 	has_secure_password
 	validates :phone, numericality: { only_integer: true, message: 'Deve contenere solo numeri.' }
-	validates :profile_picture_path, format: { with: /\A(?:\/?|\\?+[\w-]+\/?|\\?)+[.]+[a-zA-Z]+\z/, message: 'Non è valido.' }
+
+	has_one_attached :avatar
 
   belongs_to :course
 
