@@ -23,7 +23,7 @@ class UsersController < ApplicationController
   end
 
   #GET /users/me
-  def auth_user_informations
+  def me
     user = User.includes(:course, :categories).find_by(id: request.env['jwt.payload']['user_id'])
 
     @serializer_options[:include] = [:course, :categories]
@@ -79,7 +79,7 @@ class UsersController < ApplicationController
     render json: UserSerializer.new(@members, @serializer_options).serialized_json
   end
 
-  # GET /users?serch=querystring&not_in_project=:id
+  # GET /users?not_in_project=:id&search=querystring
   def search_users
     querystring = params[:search]
 
@@ -91,14 +91,7 @@ class UsersController < ApplicationController
         @pagy, users = pagy(User.matching(querystring))
       end
     else
-      if params[:not_in_project].present?
-        members = Project.find(params[:not_in_project]).members
-        @pagy, users = pagy(User.where.not(id: members.ids))
-      else
-        # qui ho messo un index per ora ma bisogna vedere cosa restituire
-        # se una chima questa route senza nessun parametro, io ci piazzerei un errore
-        @pagy, users = pagy(User.all)
-      end
+      return render json: ErrorSerializer.new('Inserire una striga di ricerca per l\'utente', status_code(:bad_request)).serialized_json, status: :bad_request
     end
 
     @serializer_options.merge!(pagination_options(@pagy))

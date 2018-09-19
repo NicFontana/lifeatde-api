@@ -17,8 +17,10 @@ Rails.application.routes.draw do
 		end
 		get 'study_groups', :to => 'study_groups#search'
     get 'users', :to => 'users#search_users'
-    get 'users/me', :to => 'users#auth_user_informations'
 		resources :users do
+      collection do
+        get :me
+      end
       get 'projects', :to => 'projects#user_projects'
     end
     post 'login', :to => 'authentication#login'
