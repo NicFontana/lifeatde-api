@@ -29,7 +29,7 @@ class BooksController < ApplicationController
 
 	  if @book.save
 		  @serializer_options[:include] = [:user]
-		  @serializer_options[:meta][:message] = 'Materiale messo in vendita con successo!'
+		  @serializer_options[:meta][:messages] = ['Materiale messo in vendita con successo!']
 
 		  render json: BookSerializer.new(@book, @serializer_options).serialized_json, status: :created
 	  else
@@ -44,7 +44,7 @@ class BooksController < ApplicationController
 	  end
 
 	  if @book.update(book_params)
-		  @serializer_options[:meta][:message] = 'Materiale in vendita aggiornato con successo!'
+		  @serializer_options[:meta][:messages] = ['Materiale in vendita aggiornato con successo!']
 
 		  render json: BookSerializer.new(@book, @serializer_options).serialized_json
 	  else
@@ -61,7 +61,7 @@ class BooksController < ApplicationController
 
 	  @book.destroy
 
-	  @serializer_options[:meta][:message] = 'Materiale tolto dalla vendita con successo!'
+	  @serializer_options[:meta][:messages] = ['Materiale tolto dalla vendita con successo!']
 
 	  render json: BookSerializer.new(@book, @serializer_options).serialized_json
   end
@@ -88,7 +88,7 @@ class BooksController < ApplicationController
 			messages.push("'#{photo.blob.filename}' eliminato con successo!")
 		end
 
-		@serializer_options[:meta][:message] = messages
+		@serializer_options[:meta][:messages] = messages
 
 		render json: BookSerializer.new(@book, @serializer_options).serialized_json
 	end
