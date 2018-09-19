@@ -16,11 +16,11 @@ Rails.application.routes.draw do
 			get 'news', :to => 'news#course_news'
 		end
 		get 'study_groups', :to => 'study_groups#search'
+    get 'users/me', :to => 'users#auth_user_informations'
 		resources :users do
       get 'projects', :to => 'projects#user_projects'
     end
     post 'login', :to => 'authentication#login'
-    get 'user/me', :to => 'users#auth_user_informations'
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

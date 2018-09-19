@@ -22,11 +22,13 @@ class UsersController < ApplicationController
     end
   end
 
-  #GET /user/me
+  #GET /users/me
   def auth_user_informations
-    user = User.includes(:course, :categories).find(auth_user.id)
+    user = User.includes(:course, :categories).find_by(id: request.env['jwt.payload']['user_id'])
 
-    render json: UserSerializer.new(user).serialized_json
+    @serializer_options[:include] = [:course, :categories]
+
+    render json: UserSerializer.new(user, @serializer_options).serialized_json
   end
 
   # POST /projects/:project_id/members
@@ -85,7 +87,6 @@ class UsersController < ApplicationController
     #else
       @pagy, users = pagy(User.where.not(id: members.ids))
     #end
-    @serializer_options.merge!(pagination_options(@pagy))
     render json: UserSerializer.new(users, @serializer_options).serialized_json
   end
 
