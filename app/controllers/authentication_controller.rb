@@ -3,10 +3,13 @@ class AuthenticationController < ApplicationController
 		@user = User.find_by(email: params[:email].to_s.downcase)
 
 		if @user && @user.authenticate(params[:password])
-			auth_token = JsonWebToken.encode({user_id: @user.id})
-			render json: {:data => [{token: auth_token}]}, status: :ok
+			token = JsonWebToken.encode({user_id: @user.id})
+
+			@serializer_options[:params] = {token: token}
+
+			render json: UserSerializer.new(@user, @serializer_options).serialized_json
 		else
-			render json: {:errors => [{:status => Rack::Utils.status_code(:not_found), :detail => 'Invalid credentials'}]}
+			render json: ErrorSerializer.new(@user.errors, status_code(:not_found)).serialized_json, status: :not_found
 		end
 	end
 end

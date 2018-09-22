@@ -22,15 +22,6 @@ class UsersController < ApplicationController
     end
   end
 
-  #GET /users/me
-  def me
-    user = User.includes(:course, :categories).find_by(id: request.env['jwt.payload']['user_id'])
-
-    @serializer_options[:include] = [:course, :categories]
-
-    render json: UserSerializer.new(user, @serializer_options).serialized_json
-  end
-
   # POST /projects/:project_id/members
   def members_add
     @project = Project.includes(:admins).find(params[:project_id])

@@ -5,9 +5,6 @@ Rails.application.routes.draw do
 
     get 'users', :to => 'users#search'
     resources :users, only: [:show, :update] do
-      collection do
-        get :me
-      end
       get 'projects', :to => 'projects#user_projects'
       get 'study_groups', :to => 'study_groups#user_study_groups'
       get 'books', :to => 'books#user_books'
