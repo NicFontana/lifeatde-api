@@ -6,10 +6,11 @@ class AuthenticationController < ApplicationController
 			token = JsonWebToken.encode({user_id: @user.id})
 
 			@serializer_options[:params] = {token: token}
+			@serializer_options[:meta][:messages] = ['Login effettuato con successo!']
 
 			render json: UserSerializer.new(@user, @serializer_options).serialized_json
 		else
-			render json: ErrorSerializer.new(@user.errors, status_code(:not_found)).serialized_json, status: :not_found
+			render json: ErrorSerializer.new('Credenziali errate!', status_code(:not_found)).serialized_json, status: :not_found
 		end
 	end
 end
