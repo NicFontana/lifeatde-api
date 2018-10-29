@@ -84,5 +84,5 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Configure the default url options
-  Rails.application.routes.default_url_options[:host] = 'http://localhost:3000'
+  Rails.application.routes.default_url_options[:host] = 'http://localhost:3001'
 end

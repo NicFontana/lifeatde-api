@@ -12,7 +12,7 @@ class ProjectSerializer
       object.documents.each do |document|
         documents << {
             id: document.id,
-            url: Rails.application.routes.url_helpers.rails_blob_url(document)
+            url: Rails.application.routes.url_helpers.rails_blob_url(document, only_path: true)
         }
       end
       documents
