@@ -14,7 +14,8 @@ class BookSerializer
       object.photos.each do |photo|
         photos << {
             id: photo.id,
-            url: Rails.application.routes.url_helpers.rails_blob_url(photo)
+            url: Rails.application.routes.url_helpers.rails_blob_url(photo, only_path: true),
+            filename: photo.filename.to_s
         }
       end
       photos

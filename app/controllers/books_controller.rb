@@ -4,7 +4,7 @@ class BooksController < ApplicationController
 
   # GET /course/:course_id/books
   def index
-    @pagy, @books = pagy(Course.find(params[:course_id]).books.includes(:user).order(created_at: :desc))
+    @pagy, @books = pagy(Course.find(params[:course_id]).books.includes(:user, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 
     @serializer_options[:include] = [:user]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -68,9 +68,9 @@ class BooksController < ApplicationController
 
   def search
 	  if params[:search].present?
-		  @pagy, @books = pagy(Book.matching(params[:search]).includes(:user, :course).order(created_at: :desc))
+		  @pagy, @books = pagy(Book.matching(params[:search]).includes(:user, :course, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 	  else
-		  @pagy, @books = pagy(Book.includes(:user, :course).order(created_at: :desc))
+		  @pagy, @books = pagy(Book.includes(:user, :course, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 	  end
 
 	  @serializer_options[:include] = [:user]
@@ -95,12 +95,12 @@ class BooksController < ApplicationController
 
   # GET /users/:user_id/books
   def user_books
-	  @pagy, @books = pagy(User.find(params[:id]).books.includes(:course).order(created_at: :desc))
+	  @pagy, @books = pagy(User.find(params[:user_id]).books.includes(:course).with_attached_photos.order(created_at: :desc))
 
 	  @serializer_options[:include] = [:user]
 	  @serializer_options.merge!(pagination_options(@pagy))
 
-	  render json: BookSerializer.new(@projects, @serializer_options).serialized_json
+	  render json: BookSerializer.new(@books, @serializer_options).serialized_json
   end
 
   private
