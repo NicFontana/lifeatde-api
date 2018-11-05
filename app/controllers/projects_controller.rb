@@ -6,9 +6,9 @@ class ProjectsController < ApplicationController
   # GET /projects?search=query
   def index
     if params[:search].present?
-      @pagy, @projects = pagy(Project.matching(params[:search]).includes(:admins, :project_status, :categories).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.matching(params[:search]).includes(:admins, :project_status, :categories, admins: [:avatar_attachment]).order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status, :categories).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status, :categories, admins: [:avatar_attachment]).order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]
@@ -19,7 +19,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/:id
   def show
-    @project = Project.includes(:project_status, :categories, members: [:projects_users]).find(params[:id])
+    @project = Project.includes(:project_status, :categories, members: [:projects_users, :avatar_attachment]).with_attached_documents.find(params[:id])
 
     @serializer_options[:include] = [:members]
     @serializer_options[:params] = { project_id: params[:id] }
@@ -85,7 +85,7 @@ class ProjectsController < ApplicationController
 
   # GET /category/:category_id/projects
   def category_projects
-    @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status).order(created_at: :desc))
+    @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status, admins: [:avatar_attachment]).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -101,11 +101,11 @@ class ProjectsController < ApplicationController
 
     case admin
     when '1'
-      @projects = User.find(user_id).created_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
+      @projects = User.find(user_id).created_projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
     when '0'
-      @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
+      @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
     else
-      @projects = User.find(user_id).projects.includes(:projects_users, :project_status, :categories).order(created_at: :desc)
+      @projects = User.find(user_id).projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
     end
 
     case status

@@ -4,7 +4,7 @@ class StudyGroupsController < ApplicationController
 
 	# GET /course/:course_id/study_groups
   def index
-	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user).order(created_at: :desc))
+	  @pagy, @study_groups = pagy(Course.find(params[:course_id]).study_groups.includes(:user, user: [:avatar_attachment]).order(created_at: :desc))
 
 	  @serializer_options[:include] = [:user]
 	  @serializer_options.merge!(pagination_options(@pagy))
@@ -14,7 +14,7 @@ class StudyGroupsController < ApplicationController
 
   # GET /study_groups/:id
   def show
-    @study_group = StudyGroup.includes(:user, :course).find(params[:id])
+    @study_group = StudyGroup.includes(:user, :course, user: [:avatar_attachment]).find(params[:id])
 
     @serializer_options[:include] = [:user]
 
@@ -68,9 +68,9 @@ class StudyGroupsController < ApplicationController
 
 	def search
 		if params[:search].present?
-			@pagy, @study_groups = pagy(StudyGroup.matching(params[:search]).includes(:user, :course).order(created_at: :desc))
+			@pagy, @study_groups = pagy(StudyGroup.matching(params[:search]).includes(:user, :course, user: [:avatar_attachment]).order(created_at: :desc))
 		else
-			@pagy, @study_groups = pagy(StudyGroup.includes(:user, :course).order(created_at: :desc))
+			@pagy, @study_groups = pagy(StudyGroup.includes(:user, :course, user: [:avatar_attachment]).order(created_at: :desc))
 		end
 
 		@serializer_options[:include] = [:user]
