@@ -24,7 +24,6 @@ class ProjectSerializer
   end
 
   attribute :is_admin, if: Proc.new { |record, params| params && params[:user_id].present? && record.association(:projects_users).loaded? } do |project, params|
-    puts 'si è caricato'
     project.projects_users.detect{ |record| record.user_id == params[:user_id].to_i }.admin
   end
 

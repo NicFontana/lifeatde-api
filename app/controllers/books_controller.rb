@@ -4,7 +4,7 @@ class BooksController < ApplicationController
 
   # GET /course/:course_id/books
   def index
-    @pagy, @books = pagy(Course.find(params[:course_id]).books.includes(:user, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
+    @pagy, @books = pagy(Course.find(params[:course_id]).books.includes(:user, user: [:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 
     @serializer_options[:include] = [:user]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -56,7 +56,7 @@ class BooksController < ApplicationController
   def destroy
 	  @user = auth_user
 	  unless @book.user.id == @user.id
-		  return render json: ErrorSerializer.new('Non togliere il materiale in vendita se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi togliere il materiale in vendita se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  @book.destroy
@@ -68,9 +68,9 @@ class BooksController < ApplicationController
 
   def search
 	  if params[:search].present?
-		  @pagy, @books = pagy(Book.matching(params[:search]).includes(:user, :course, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
+		  @pagy, @books = pagy(Book.matching(params[:search]).includes(:user, :course, user: [:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 	  else
-		  @pagy, @books = pagy(Book.includes(:user, :course, user:[:avatar_attachment]).with_attached_photos.order(created_at: :desc))
+		  @pagy, @books = pagy(Book.includes(:user, :course, user: [:avatar_attachment]).with_attached_photos.order(created_at: :desc))
 	  end
 
 	  @serializer_options[:include] = [:user]
