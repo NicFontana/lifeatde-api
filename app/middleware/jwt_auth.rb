@@ -19,7 +19,7 @@ class JWTAuth
 		if path_matches_excluded_path? env
 			@app.call env
 		elsif missing_auth_header? env
-			error_response 'Missing Authorization header'
+			error_response 'Non sei autorizzato ad accedere alla risorsa'
 		else
 			verify_token env
 		end
@@ -33,11 +33,11 @@ class JWTAuth
 		begin
 			decoded_token = JsonWebToken.decode(token)
 		rescue JWT::DecodeError
-			return error_response 'Invalid token'
+			return error_response 'Sessione scaduta'
 		end
 
 		unless JsonWebToken.valid_payload?(decoded_token.first)
-			return error_response 'Invalid token'
+			return error_response 'Sessione scaduta'
 		end
 
 		env['jwt.payload'] = decoded_token.first
