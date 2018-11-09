@@ -35,7 +35,7 @@ module LifeAtDE
     config.api_only = true
 
     # Configure paths to be escluded from authentication
-    auth_excluded_path = %w(/api/login)
+    auth_excluded_path = %w(/api/login /rails/active_storage/disk)
     config.middleware.use JWTAuth, auth_excluded_path
   end
 end
