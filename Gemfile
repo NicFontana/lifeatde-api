@@ -16,6 +16,11 @@ gem 'puma', '~> 3.11'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 
+#In order to fix CVE-2018-16470. See: https://groups.google.com/forum/#!msg/rubyonrails-security/U_x-YkfuVTg/xhvYAmp6AAAJ
+gem "rack", ">= 2.0.6"
+#In order to fix CVE-2018-16468. See: https://github.com/flavorjones/loofah/issues/154
+gem "loofah", ">= 2.2.3"
+
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'
 
