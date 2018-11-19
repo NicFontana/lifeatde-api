@@ -1,14 +1,14 @@
 class ProjectsController < ApplicationController
 	include Pagination
-  before_action :set_project, only: [:update, :destroy, :documents_destroy]
+  before_action :set_project, only: [:destroy, :documents_destroy]
 
   # GET /projects
   # GET /projects?search=query
   def index
     if params[:search].present?
-      @pagy, @projects = pagy(Project.matching(params[:search]).includes(:admins, :project_status, :categories, admins: [:avatar_attachment]).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.matching(params[:search]).with_main_infos.order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.includes(:admins, :project_status, :categories, admins: [:avatar_attachment]).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.for_user(auth_user).open.with_main_infos.order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]
@@ -19,26 +19,32 @@ class ProjectsController < ApplicationController
 
   # GET /projects/:id
   def show
-    @project = Project.includes(:project_status, :categories, members: [:projects_users, :avatar_attachment]).with_attached_documents.find(params[:id])
+    @project = Project.with_full_infos.find(params[:id])
 
-    @serializer_options[:include] = [:members]
-    @serializer_options[:params] = { project_id: params[:id] }
+    @serializer_options[:include] = [:admins, :collaborators]
 
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
 
   # POST /projects
   def create
-    unless params[:project][:categories].present? && params[:project][:categories].any?
+	  categories_ids = params[:project][:categories]
+	  collaborators_ids = params[:project][:collaborators]
+
+    unless categories_ids.present? && categories_ids.any?
       return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
-    @categories = Category.find(params[:project][:categories])
     @project = Project.new(project_params)
+    @project.admins << auth_user
+    @project.categories = Category.find(categories_ids)
 
-    @project.projects_users.build(admin: true, user_id: auth_user.id)
+    if collaborators_ids.present? && collaborators_ids.any?
+      @project.collaborators = User.with_attached_avatar.find(collaborators_ids)
+    end
 
-    if @project.save && @project.categories << @categories
+    if @project.save
+	    @serializer_options[:include] = [:collaborators, :admins]
       @serializer_options[:meta][:messages] = ['Progetto creato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -49,19 +55,27 @@ class ProjectsController < ApplicationController
 
   # PATCH/PUT /projects/:id
   def update
+	  categories_ids = params[:project][:categories]
+	  collaborators_ids = params[:project][:collaborators]
+
     unless auth_user.admin? params[:id]
       return render json: ErrorSerializer.new('Non puoi aggiornare il progetto se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    if params[:project][:categories].present? && params[:project][:categories].all?(&:blank?)
+    @project = Project.with_full_infos.find(params[:id])
+
+	  unless categories_ids.present? && categories_ids.any?
       return render json: ErrorSerializer.new('Il progetto deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
     end
 
-    @categories = Category.find(params[:project][:categories])
+    @project.categories = Category.find(categories_ids)
+
+    if collaborators_ids.present? && collaborators_ids.any?
+      @project.collaborators = User.with_attached_avatar.find(collaborators_ids)
+    end
 
     if @project.update(project_params)
-      @project.categories = @categories
-
+	    @serializer_options[:include] = [:collaborators, :admins]
       @serializer_options[:meta][:messages] = ['Progetto aggiornato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -85,7 +99,7 @@ class ProjectsController < ApplicationController
 
   # GET /category/:category_id/projects
   def category_projects
-    @pagy, @projects= pagy(Category.find(params[:category_id]).projects.includes(:admins, :project_status, admins: [:avatar_attachment]).order(created_at: :desc))
+    @pagy, @projects = pagy(Category.find(params[:category_id]).projects.with_main_infos.order(created_at: :desc))
 
     @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
@@ -101,11 +115,11 @@ class ProjectsController < ApplicationController
 
     case admin
     when '1'
-      @projects = User.find(user_id).created_projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
+      @projects = User.find(user_id).created_projects.with_main_infos.order(created_at: :desc)
     when '0'
-      @projects = User.find(user_id).joined_projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
+      @projects = User.find(user_id).joined_projects.with_main_infos.order(created_at: :desc)
     else
-      @projects = User.find(user_id).projects.includes(:projects_users, :project_status, :categories, projects_users: [:avatar_attachment]).order(created_at: :desc)
+      @projects = User.find(user_id).projects.with_main_infos.order(created_at: :desc)
     end
 
     case status
@@ -115,12 +129,10 @@ class ProjectsController < ApplicationController
       @projects = @projects.closed
     when 'terminated'
       @projects = @projects.terminated
-    else
-      return render json: ErrorSerializer.new("Parametro status = #{status} non riconosciuto. Consentiti: 'open', 'closed', 'terminated'", status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
     @pagy, @projects = pagy(@projects)
-    @serializer_options[:params] = { user_id: user_id }
+    @serializer_options[:include] = [:admins]
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
@@ -149,6 +161,6 @@ class ProjectsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def project_params
-      params.require(:project).permit(:title, :description, :results, :project_status_id, documents: [])
+      params.require(:project).permit(:title, :description, :results, :project_status_id, :categories, :collaborators, documents: [])
     end
 end
