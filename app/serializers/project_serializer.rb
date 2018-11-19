@@ -28,13 +28,19 @@ class ProjectSerializer
   end
 
   attribute :status do |project, params|
-    project.project_status.name
+    {
+      id: project.project_status.id,
+      name: project.project_status.name
+    }
   end
 
   attribute :categories do |project, params|
     categories = []
     project.categories.each do |category|
-      categories << category.name
+      categories << {
+        id: category.id,
+        name: category.name
+      }
     end
     categories
   end
