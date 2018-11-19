@@ -2,7 +2,7 @@ class UserSerializer
   include FastJsonapi::ObjectSerializer
 
   attributes :firstname, :lastname, :email, :bio, :birthday, :phone
-  attribute :avatar do |user|
+  attribute :avatar, if: Proc.new { |record, params| record.association(:avatar_attachment).loaded? } do |user|
     if user.avatar.attached?
       {
         id: user.avatar.id,
@@ -15,9 +15,7 @@ class UserSerializer
       }
     end
   end
-  attribute :admin, if: Proc.new { |record, params| params && params[:project_id].present? && record.association(:projects_users).loaded? } do |user, params|
-    user.admin? params[:project_id]
-  end
+
   attribute :token, if: Proc.new { |record, params| params && params[:token].present? } do |user, params|
     params[:token]
   end

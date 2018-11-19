@@ -29,4 +29,13 @@ class Project < ApplicationRecord
 		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
 	end
 
+	def self.with_main_infos
+		includes(:project_status, :categories, admins: [:avatar_attachment])
+	end
+
+	def self.with_full_infos
+		includes(:project_status, :categories, admins: [:avatar_attachment], collaborators: [:avatar_attachment])
+		.with_attached_documents
+	end
+
 end
