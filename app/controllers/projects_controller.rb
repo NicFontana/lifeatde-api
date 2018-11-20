@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
 	include Pagination
-  before_action :set_project, only: [:destroy, :documents_destroy]
+  before_action :set_project, only: [:destroy]
 
   # GET /projects
   # GET /projects?search=query
@@ -8,7 +8,7 @@ class ProjectsController < ApplicationController
     if params[:search].present?
       @pagy, @projects = pagy(Project.matching(params[:search]).with_main_infos.order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.with_main_infos.order(created_at: :desc))
+      @pagy, @projects = pagy(Project.of_categories_with_main_infos(auth_user.categories.ids).open.order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]
@@ -72,6 +72,8 @@ class ProjectsController < ApplicationController
 
     if collaborators_ids.present? && collaborators_ids.any?
       @project.collaborators = User.with_attached_avatar.find(collaborators_ids)
+    else
+      @project.collaborators.delete_all
     end
 
     if @project.update(project_params)
@@ -138,8 +140,12 @@ class ProjectsController < ApplicationController
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
-  # DELETE /project/:id/documents
+  # DELETE /projects/:project_id/documents
   def documents_destroy
+    unless auth_user.admin? params[:project_id]
+      return render json: ErrorSerializer.new('Non puoi eliminare documenti se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
+    end
+
     @documents = ActiveStorage::Attachment.find(params[:documents])
     messages = []
 

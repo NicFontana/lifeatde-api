@@ -25,8 +25,13 @@ class Project < ApplicationRecord
 
 	scope :matching, -> (querystring) {where('title LIKE ? OR description LIKE ?', "%#{querystring}%", "%#{querystring}%")}
 
-	def self.for_user(user)
-		joins(:categories).where(categories_projects: {category_id: user.categories.ids})
+	def self.of_categories_with_main_infos(categories_ids)
+		#includes will only fetch Category records of categories_ids,
+		#not all categories associated with each project.
+		joins(:categories)
+				.where(categories: {id: categories_ids})
+				.preload(:categories)
+				.includes(:project_status, admins: [:avatar_attachment])
 	end
 
 	def self.with_main_infos

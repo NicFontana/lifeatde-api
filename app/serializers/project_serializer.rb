@@ -13,7 +13,8 @@ class ProjectSerializer
         documents << {
             id: document.id,
             url: Rails.application.routes.url_helpers.rails_blob_url(document, only_path: true),
-            filename: document.filename.to_s,
+            name: document.filename.to_s,
+            byte_size: document.byte_size.to_i,
             content_type: document.content_type.to_s
         }
       end
