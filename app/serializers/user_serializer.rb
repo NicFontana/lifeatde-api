@@ -8,11 +8,6 @@ class UserSerializer
         id: user.avatar.id,
         url: Rails.application.routes.url_helpers.rails_blob_url(user.avatar)
       }
-    else
-      {
-        id: nil,
-        url: "#{Rails.application.routes.default_url_options[:host]}/images/avatar.png"
-      }
     end
   end
 
