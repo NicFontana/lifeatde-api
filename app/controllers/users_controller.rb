@@ -24,13 +24,12 @@ class UsersController < ApplicationController
 
   # POST /projects/:project_id/members
   def members_add
-    @project = Project.includes(:admins).find(params[:project_id])
-    @collaborators = User.includes(:projects_users).find(params[:users][:ids])
-    @current_user = auth_user
+	  unless auth_user.admin? params[:project_id]
+		  return render json: ErrorSerializer.new('Non puoi aggiungere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
+	  end
 
-    unless @current_user.admin? params[:project_id]
-      return render json: ErrorSerializer.new('Non puoi aggiungere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
-    end
+    @project = Project.find(params[:project_id])
+    @collaborators = User.includes(:projects_users).find(params[:users][:ids])
 
     if @project.collaborators << @collaborators
       @serializer_options[:params] = {project_id: params[:project_id]}
@@ -44,15 +43,12 @@ class UsersController < ApplicationController
 
   # DELETE /projects/:project_id/members
   def members_destroy
-    @project = Project.includes(:admins).find(params[:project_id])
+	  unless auth_user.admin? params[:project_id]
+		  return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
+	  end
+
     @collaborators = User.includes(:projects_users).find(params[:user][:ids])
-    @current_user = auth_user
-
-    unless @current_user.admin? params[:project_id]
-      return render json: ErrorSerializer.new('Non puoi rimuovere membri se non sei l\'admin del progetto', status_code(:forbidden)).serialized_json, status: :forbidden
-    end
-
-    @project.collaborators.delete(@collaborators)
+	  Project.find(params[:project_id]).collaborators.delete(@collaborators)
 
     @serializer_options[:params] = {project_id: params[:project_id]}
     @serializer_options[:meta][:messages] = ['Membri eliminati con successo!']

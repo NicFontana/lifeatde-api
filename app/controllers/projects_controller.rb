@@ -8,7 +8,7 @@ class ProjectsController < ApplicationController
     if params[:search].present?
       @pagy, @projects = pagy(Project.matching(params[:search]).with_main_infos.order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user(auth_user).open.with_main_infos.order(created_at: :desc))
+      @pagy, @projects = pagy(Project.of_categories_with_main_infos(auth_user.categories.ids).open.order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins]

@@ -20,6 +20,10 @@ class UserSerializer
     params[:token]
   end
 
+  attribute :admin, if: Proc.new { |record, params| params && params[:project_id].present? && record.association(:projects_users).loaded? } do |user, params|
+	  user.admin? params[:project_id]
+  end
+
   belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }
   has_many :categories, if: Proc.new { |record, params| record.association(:categories).loaded? }
   has_many :projects, if: Proc.new { |record, params| record.association(:projects).loaded? }
