@@ -34,4 +34,8 @@ class User < ApplicationRecord
 		record = projects_users.detect{ |el| el.project_id == project_id.to_i }
 		record.nil? ? false : record.admin
 	end
+
+	def self.with_full_infos
+		includes(:categories, :course).with_attached_avatar
+	end
 end

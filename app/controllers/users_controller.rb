@@ -1,19 +1,32 @@
 class UsersController < ApplicationController
   include Pagination
-  before_action :set_user, only: [:show, :update, :avatar_destroy]
+  before_action :set_user, only: [:update, :avatar_destroy]
 
   # GET /users/:id
   def show
-    render json: UserSerializer.new(@user).serialized_json
+    @user = User.with_full_infos.find(params[:id])
+
+    @serializer_options[:include] = [:course, :categories]
+
+    render json: UserSerializer.new(@user, @serializer_options).serialized_json
   end
 
   # PATCH/PUT /users/:id
   def update
+    categories_ids = params[:user][:categories]
+
     unless @user.id == auth_user.id
       return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
+    unless categories_ids.present? && categories_ids.any?
+      return render json: ErrorSerializer.new('Devi avere almeno una categoria preferita', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+    end
+
     if @user.update(user_params)
+      @user.categories = Category.find(categories_ids)
+
+      @serializer_options[:include] = [:course, :categories]
       @serializer_options[:meta][:messages] = ['Profilo aggiornato con successo!']
 
       render json: UserSerializer.new(@user, @serializer_options).serialized_json
@@ -103,6 +116,6 @@ class UsersController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-	    params.require(:user).permit(:bio, :phone, :avatar)
+	    params.require(:user).permit(:bio, :phone, :avatar, :categories)
     end
 end
