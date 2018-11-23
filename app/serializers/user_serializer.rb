@@ -6,7 +6,7 @@ class UserSerializer
     if user.avatar.attached?
       {
         id: user.avatar.id,
-        url: Rails.application.routes.url_helpers.rails_blob_url(user.avatar)
+        url: Rails.application.routes.url_helpers.rails_blob_url(user.avatar, only_path: true)
       }
     end
   end

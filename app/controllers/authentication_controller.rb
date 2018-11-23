@@ -1,6 +1,6 @@
 class AuthenticationController < ApplicationController
 	def login
-		@user = User.includes(:course, :categories).find_by(email: params[:email].to_s.downcase)
+		@user = User.with_full_infos.includes(:course, :categories).find_by(email: params[:email].to_s.downcase)
 
 		if @user && @user.authenticate(params[:password])
 			token = JsonWebToken.encode({user_id: @user.id})

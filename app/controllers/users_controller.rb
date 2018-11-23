@@ -14,6 +14,7 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/:id
   def update
     categories_ids = params[:user][:categories]
+    @user = User.with_full_infos.find(params[:id])
 
     unless @user.id == auth_user.id
       return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
