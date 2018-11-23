@@ -81,7 +81,7 @@ class StudyGroupsController < ApplicationController
 
 	# GET /users/:user_id/study_groups
 	def user_study_groups
-		@pagy, @study_groups = pagy(User.find(params[:user_id]).study_groups.includes(:course).order(created_at: :desc))
+		@pagy, @study_groups = pagy(User.with_attached_avatar.find(params[:user_id]).study_groups.includes(:course).order(created_at: :desc))
 
 		@serializer_options[:include] = [:user]
 		@serializer_options.merge!(pagination_options(@pagy))

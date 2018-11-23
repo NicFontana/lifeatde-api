@@ -95,7 +95,7 @@ class BooksController < ApplicationController
 
   # GET /users/:user_id/books
   def user_books
-	  @pagy, @books = pagy(User.find(params[:user_id]).books.includes(:course).with_attached_photos.order(created_at: :desc))
+	  @pagy, @books = pagy(User.with_attached_avatar.find(params[:user_id]).books.includes(:course).with_attached_photos.order(created_at: :desc))
 
 	  @serializer_options[:include] = [:user]
 	  @serializer_options.merge!(pagination_options(@pagy))
