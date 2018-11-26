@@ -29,9 +29,11 @@ class Project < ApplicationRecord
 		#includes will only fetch Category records of categories_ids,
 		#not all categories associated with each project.
 		joins(:categories)
-				.where(categories: {id: categories_ids})
-				.preload(:categories)
-				.includes(:project_status, admins: [:avatar_attachment])
+			.where(categories: {id: categories_ids})
+			.preload(:categories)
+			.includes(:project_status, admins: [:avatar_attachment])
+			.group(:id)
+
 	end
 
 	def self.with_main_infos

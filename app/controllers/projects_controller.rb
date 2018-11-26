@@ -17,6 +17,21 @@ class ProjectsController < ApplicationController
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
+  def by_categories
+    unless params[:project][:categories].present? && params[:project][:categories].any?
+      return render json: ErrorSerializer.new('La ricerca deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
+    end
+
+    categories_ids = params[:project][:categories]
+
+    @pagy, @projects = pagy(Project.of_categories_with_main_infos(categories_ids))
+
+    @serializer_options[:include] = [:admins]
+    @serializer_options.merge!(pagination_options(@pagy))
+
+    render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
+  end
+
   # GET /projects/:id
   def show
     @project = Project.with_full_infos.find(params[:id])
