@@ -2,7 +2,6 @@ class BooksController < ApplicationController
   include Pagination
   before_action :set_book, only: [:update, :destroy, :photos_destroy]
   before_action :check_if_images, only: [:create, :update]
-  before_action :authorize_action, only: [:update, :destroy, :photos_destroy]
 
   # GET /course/:course_id/books
   def index
