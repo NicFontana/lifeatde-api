@@ -12,15 +12,16 @@ Rails.application.routes.draw do
     end
 
     resources :projects do
+      collection do
+        get 'by_categories', :to => 'projects#by_categories'
+      end
       get 'members', :to => 'users#members_index'
       post 'members', :to => 'users#members_add'
       delete 'members', :to => 'users#members_destroy'
       delete 'documents', :to => 'projects#documents_destroy'
     end
 
-    resources :categories, only: [:index, :show] do
-      get 'projects', :to => 'projects#category_projects'
-    end
+    resources :categories, only: [:index, :show]
 
 		resources :courses, only: [:index, :show] do
 			resources :study_groups, shallow: true
