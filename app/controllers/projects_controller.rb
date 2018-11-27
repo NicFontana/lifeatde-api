@@ -8,15 +8,16 @@ class ProjectsController < ApplicationController
     if params[:search].present?
       @pagy, @projects = pagy(Project.matching(params[:search]).with_main_infos.order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.of_categories_with_main_infos(auth_user.categories.ids).open.order(created_at: :desc))
+      @pagy, @projects = pagy(Project.for_user_home(auth_user).order(created_at: :desc))
     end
 
-    @serializer_options[:include] = [:admins]
+    @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
   end
 
+  # GET /projects/by_categories?project[categories][]=1
   def by_categories
     unless params[:project][:categories].present? && params[:project][:categories].any?
       return render json: ErrorSerializer.new('La ricerca deve contenere almeno una categoria', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
@@ -24,9 +25,9 @@ class ProjectsController < ApplicationController
 
     categories_ids = params[:project][:categories]
 
-    @pagy, @projects = pagy(Project.of_categories_with_main_infos(categories_ids))
+    @pagy, @projects = pagy(Project.by_categories_with_main_infos(categories_ids))
 
-    @serializer_options[:include] = [:admins]
+    @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
@@ -36,7 +37,7 @@ class ProjectsController < ApplicationController
   def show
     @project = Project.with_full_infos.find(params[:id])
 
-    @serializer_options[:include] = [:admins, :collaborators]
+    @serializer_options[:include] = [:admins, :collaborators, :project_status, :categories]
 
     render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
   end
@@ -59,7 +60,7 @@ class ProjectsController < ApplicationController
     end
 
     if @project.save
-	    @serializer_options[:include] = [:collaborators, :admins]
+	    @serializer_options[:include] = [:collaborators, :admins, :project_status, :categories]
       @serializer_options[:meta][:messages] = ['Progetto creato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -92,7 +93,6 @@ class ProjectsController < ApplicationController
     end
 
     if @project.update(project_params)
-	    @serializer_options[:include] = [:collaborators, :admins]
       @serializer_options[:meta][:messages] = ['Progetto aggiornato con successo!']
 
       render json: ProjectSerializer.new(@project, @serializer_options).serialized_json
@@ -118,7 +118,7 @@ class ProjectsController < ApplicationController
   def category_projects
     @pagy, @projects = pagy(Category.find(params[:category_id]).projects.with_main_infos.order(created_at: :desc))
 
-    @serializer_options[:include] = [:admins]
+    @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
@@ -149,7 +149,7 @@ class ProjectsController < ApplicationController
     end
 
     @pagy, @projects = pagy(@projects)
-    @serializer_options[:include] = [:admins]
+    @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))
 
     render json: ProjectSerializer.new(@projects, @serializer_options).serialized_json
