@@ -99,7 +99,8 @@ class UsersController < ApplicationController
         members = Project.find(params[:not_in_project]).members
         @pagy, users = pagy(User.where.not(id: members.ids).matching(querystring))
       else
-        @pagy, users = pagy(User.matching(querystring))
+        @pagy, users = pagy(User.with_full_infos.matching(querystring))
+        @serializer_options[:include] = [:course]
       end
     else
       return render json: ErrorSerializer.new('Inserire una striga di ricerca per l\'utente', status_code(:bad_request)).serialized_json, status: :bad_request
