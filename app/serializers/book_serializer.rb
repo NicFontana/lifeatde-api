@@ -3,10 +3,7 @@ class BookSerializer
   attributes :title, :description, :price, :created_at
 
   belongs_to :user, if: Proc.new { |record, params| record.association(:user).loaded? }
-
-  attribute :course, if: Proc.new { |record, params| record.association(:course).loaded? } do |book, params|
-    book.course.name
-  end
+  belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }
 
   attribute :photos do |object|
     if object.photos.attached?
@@ -15,7 +12,9 @@ class BookSerializer
         photos << {
             id: photo.id,
             url: Rails.application.routes.url_helpers.rails_blob_url(photo, only_path: true),
-            filename: photo.filename.to_s
+            name: photo.filename.to_s,
+            byte_size: photo.byte_size.to_i,
+            content_type: photo.content_type.to_s
         }
       end
       photos
