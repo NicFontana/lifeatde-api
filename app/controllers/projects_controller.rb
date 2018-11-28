@@ -5,10 +5,14 @@ class ProjectsController < ApplicationController
   # GET /projects
   # GET /projects?search=query
   def index
+    @user = auth_user
+
     if params[:search].present?
       @pagy, @projects = pagy(Project.matching(params[:search]).with_main_infos.order(created_at: :desc))
+    elsif @user.categories.any?
+      @pagy, @projects = pagy(Project.for_user_home(@user).open.order(created_at: :desc))
     else
-      @pagy, @projects = pagy(Project.for_user_home(auth_user).order(created_at: :desc))
+      @pagy, @projects = pagy(Project.with_main_infos.open.order(created_at: :desc))
     end
 
     @serializer_options[:include] = [:admins, :project_status, :categories]
@@ -25,7 +29,7 @@ class ProjectsController < ApplicationController
 
     categories_ids = params[:project][:categories]
 
-    @pagy, @projects = pagy(Project.by_categories_with_main_infos(categories_ids))
+    @pagy, @projects = pagy(Project.by_categories(categories_ids))
 
     @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))

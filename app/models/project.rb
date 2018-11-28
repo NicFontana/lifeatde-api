@@ -33,10 +33,9 @@ class Project < ApplicationRecord
 				.preload(:categories, admins: [:avatar_attachment])
 				.includes(:project_status)
 				.group(:id)
-				.open
 	end
 
-	def self.by_categories_with_main_infos(categories_ids)
+	def self.by_categories(categories_ids)
 		#includes will only fetch Category records of categories_ids,
 		#not all categories associated with each project.
 		joins(:categories)
