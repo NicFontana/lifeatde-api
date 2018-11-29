@@ -1,10 +1,6 @@
 class BookSerializer
   include FastJsonapi::ObjectSerializer
   attributes :title, :description, :price, :created_at
-
-  belongs_to :user, if: Proc.new { |record, params| record.association(:user).loaded? }
-  belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }
-
   attribute :photos do |object|
     if object.photos.attached?
       photos = []
@@ -22,4 +18,7 @@ class BookSerializer
       nil
     end
   end
+
+  belongs_to :user, if: Proc.new { |record, params| record.association(:user).loaded? }
+  belongs_to :course, if: Proc.new { |record, params| record.association(:course).loaded? }
 end

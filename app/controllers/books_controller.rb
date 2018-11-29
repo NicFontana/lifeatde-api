@@ -41,7 +41,7 @@ class BooksController < ApplicationController
   # PATCH/PUT /books/:id
   def update
 	  unless @book.user.id == auth_user.id
-		  return render json: ErrorSerializer.new('Non puoi aggiornare questo materiale se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi aggiornare questo materiale se non sei il proprietario', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  if @book.update(book_params)
@@ -53,10 +53,10 @@ class BooksController < ApplicationController
 	  end
   end
 
-  # DELETE /books/1
+  # DELETE /books/:id
   def destroy
 	  unless @book.user.id == auth_user.id
-		  return render json: ErrorSerializer.new('Non puoi togliere il materiale in vendita se non sei l\'admin', status_code(:forbidden)).serialized_json, status: :forbidden
+		  return render json: ErrorSerializer.new('Non puoi togliere il materiale in vendita se non sei il proprietario', status_code(:forbidden)).serialized_json, status: :forbidden
 	  end
 
 	  @book.destroy
@@ -66,6 +66,7 @@ class BooksController < ApplicationController
 	  render json: BookSerializer.new(@book, @serializer_options).serialized_json
   end
 
+  # GET /books?search=query
   def search
 	  if params[:search].present?
 		  @pagy, @books = pagy(Book.matching(params[:search]).with_full_infos.order(created_at: :desc))
@@ -82,7 +83,7 @@ class BooksController < ApplicationController
   # DELETE /books/:id/photos
 	def photos_destroy
 		unless @book.user.id == auth_user.id
-			return render json: ErrorSerializer.new('Non puoi eliminare foto se non sei il propietario', status_code(:forbidden)).serialized_json, status: :forbidden
+			return render json: ErrorSerializer.new('Non puoi eliminare foto se non sei il proprietario', status_code(:forbidden)).serialized_json, status: :forbidden
 		end
 
 		@photos = ActiveStorage::Attachment.find(params[:photos])
@@ -119,6 +120,7 @@ class BooksController < ApplicationController
       params.require(:book).permit(:title, :description, :price, :course_id, photos: [])
     end
 
+    # Check if the uploaded photos are images
 		def check_if_images
 			if params[:book][:photos].present?
 				re = Regexp.new("image/\\S+\\b")
