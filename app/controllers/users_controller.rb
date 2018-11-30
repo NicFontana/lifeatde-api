@@ -13,19 +13,19 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/:id
   def update
-    categories_ids = params[:user][:categories]
     @user = User.with_full_infos.find(params[:id])
 
     unless @user.id == auth_user.id
       return render json: ErrorSerializer.new('Puoi aggiornare solo il tuo profilo', status_code(:forbidden)).serialized_json, status: :forbidden
     end
 
-    unless categories_ids.present? && categories_ids.any?
-      return render json: ErrorSerializer.new('Devi avere almeno una categoria preferita', status_code(:unprocessable_entity)).serialized_json, status: :unprocessable_entity
-    end
-
     if @user.update(user_params)
-      @user.categories = Category.find(categories_ids)
+      categories_ids = params[:user][:categories]
+      if categories_ids.present? && categories_ids.any?
+        @user.categories = Category.find(categories_ids)
+      else
+        @user.categories.delete_all
+      end
 
       @serializer_options[:include] = [:course, :categories]
       @serializer_options[:meta][:messages] = ['Profilo aggiornato con successo!']
