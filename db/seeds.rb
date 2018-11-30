@@ -117,36 +117,6 @@ user.save!
 
 user = User.new(
     {
-        firstname: "Niccolò",
-        lastname: "Fontana",
-        email: "niccolo.fontana@student.unife.it",
-        password_digest: "#{BCrypt::Password.create('carota')}",
-        bio: Faker::Lorem.paragraph,
-        birthday: Faker::Date.birthday(19, 30),
-        phone: 1234567890,
-        course_id: 5
-    }
-)
-user.categories << categories.sample(3)
-user.save!
-
-user = User.new(
-    {
-        firstname: "Giovanni",
-        lastname: "Fiorini",
-        email: "giovanni.fiorini@student.unife.it",
-        password_digest: "#{BCrypt::Password.create('carota')}",
-        bio: Faker::Lorem.paragraph,
-        birthday: Faker::Date.birthday(19, 30),
-        phone: 1234567890,
-        course_id: 5
-    }
-)
-user.categories << categories.sample(3)
-user.save!
-
-user = User.new(
-    {
         firstname: "Mauro",
         lastname: "Tortonesi",
         email: "mauro.tortonesi@unife.it",
