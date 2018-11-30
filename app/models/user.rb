@@ -1,6 +1,8 @@
 class User < ApplicationRecord
 	has_secure_password
-	validates :phone, numericality: { only_integer: true, message: 'Il numero di telefono deve contenere solo numeri' }
+	validates :phone,
+	          numericality: { only_integer: false, message: 'Il numero di telefono deve contenere solo numeri' },
+	          allow_blank: true
 
 	has_one_attached :avatar
 
