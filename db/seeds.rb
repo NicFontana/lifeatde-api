@@ -169,7 +169,7 @@ end
 25.times do
   news = News.create(
       {
-          title: Faker::OnePiece.unique.quote,
+          title: Faker::OnePiece.unique.island,
           description: Faker::SiliconValley.quote
       }
   )
