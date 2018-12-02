@@ -29,7 +29,7 @@ class ProjectsController < ApplicationController
 
     categories_ids = params[:project][:categories]
 
-    @pagy, @projects = pagy(Project.by_categories(categories_ids))
+    @pagy, @projects = pagy(Project.by_categories(categories_ids).order(created_at: :desc))
 
     @serializer_options[:include] = [:admins, :project_status, :categories]
     @serializer_options.merge!(pagination_options(@pagy))
