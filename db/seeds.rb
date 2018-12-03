@@ -145,6 +145,21 @@ user = User.new(
 user.categories << categories.sample(3)
 user.save!
 
+user = User.new(
+    {
+        firstname: "John",
+        lastname: "Doe",
+        email: "john.doe@student.unife.it",
+        password_digest: "#{BCrypt::Password.create('password')}",
+        bio: Faker::Lorem.paragraph,
+        birthday: Faker::Date.birthday(19, 30),
+        phone: 1234567890,
+        course_id: 3
+    }
+)
+user.categories << categories.sample(3)
+user.save!
+
 
 5.times do |i|
   project = Project.new(
