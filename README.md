@@ -27,15 +27,14 @@ Of course every result is **paginated** and we decided to entrust this task to t
 ## Install and Run
 **_Requirements:_**
 * Ruby 2.5.1
-* Rails 5.2.0
-* Bundler 
+* Bundler
 * MySQL >= 5.5
 
 Clone or download this repository, open a new terminal inside the project directory, then:
 1. ```bundle install```
 2. ```cp config/database.yml.example config/database.yml```
 3. Open the ```config/database.yml``` file and set the ```database``` ```username``` and ```password``` variables according to your needs
-4. Start your installed MySQL 
+4. Start your installed MySQL
 5. ```bin/rake db:create```
 6. ```bin/rake db:migrate```
 7. ```bin/rake db:seed```
