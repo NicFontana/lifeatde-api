@@ -11,7 +11,7 @@ class ApplicationController < ActionController::API
 	rescue_from ActiveRecord::RecordNotUnique do |error|
 		render json: ErrorSerializer.new(error.message, status_code(:internal_server_error)).serialized_json, status: :internal_server_error
 	end
-	rescue_from Pagy::OutOfRangeError do |error|
+	rescue_from Pagy::OverflowError do |error|
 		render json: ErrorSerializer.new(error.message, status_code(:internal_server_error)).serialized_json, status: :internal_server_error
 	end
 

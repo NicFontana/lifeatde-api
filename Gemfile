@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.5.1'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.0'
+gem 'rails', '~> 5.2.2'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
 # Use Puma as the app server
@@ -15,11 +15,6 @@ gem 'puma', '~> 3.11'
 # gem 'redis', '~> 4.0'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-
-#In order to fix CVE-2018-16470. See: https://groups.google.com/forum/#!msg/rubyonrails-security/U_x-YkfuVTg/xhvYAmp6AAAJ
-gem 'rack', '>= 2.0.6'
-#In order to fix CVE-2018-16468. See: https://github.com/flavorjones/loofah/issues/154
-gem 'loofah', '>= 2.2.3'
 
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'
@@ -54,3 +49,4 @@ gem 'fast_jsonapi'
 gem 'jwt'
 gem 'faker'
 gem 'pagy'
+gem "aws-sdk-s3", require: false
