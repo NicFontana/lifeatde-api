@@ -4,6 +4,7 @@ An academic Ruby on Rails (API only) application built by students for the stude
 Since it is an API only application, we've also build the client counterpart in [React](https://github.com/facebook/react) which you can find [here](https://github.com/xBlue0/lifeatde-app).
 
 :books: *__Disclaimer__* :books:
+
 The project was born from one of our ideas and aims to fulfill the requests of the Concurrent Programming Laboratory course, i.e. it is not a platform associated with the University of Ferrara.
 
 ## Demo
